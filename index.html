@@ -1094,6 +1094,79 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
 
 .professional-core-summary{display:grid;gap:.35rem;margin:1rem 0;padding:1rem;border-radius:18px;background:linear-gradient(135deg,rgba(10,55,96,.08),rgba(22,143,208,.12));border:1px solid rgba(22,143,208,.22)}
 .professional-core-summary span{font-size:.78rem;font-weight:800;color:#168fd0}.professional-core-summary strong{color:#0a3760;line-height:1.7}.professional-core-summary small{color:#526f85;line-height:1.65}
+
+
+/* الإصدار ٨٫٠٫٥ — مدة مرنة ووضع كتابة النص فقط */
+.project-mode-card {
+  margin-top: 13px;
+  padding: 13px;
+  border: 1px solid rgba(20, 143, 208, .28);
+  border-radius: 17px;
+  background: linear-gradient(135deg, #f6fcff, #fffdf7);
+}
+.project-mode-card .mode-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e7f6fd;
+  color: #0a5d8d;
+  font-size: .82rem;
+  font-weight: 800;
+}
+body.text-only-project .project-mode-card {
+  border-color: rgba(217, 114, 13, .38);
+  background: linear-gradient(135deg, #fffaf0, #f6fcff);
+  box-shadow: 0 10px 28px rgba(10, 55, 96, .07);
+}
+body.text-only-project .project-mode-card .mode-badge {
+  background: #fff0d8;
+  color: #9a5108;
+}
+.manual-timing-control {
+  margin-top: 13px;
+  padding: 13px;
+  border: 1px solid rgba(232, 136, 17, .30);
+  border-radius: 16px;
+  background: rgba(255, 250, 240, .78);
+}
+.manual-timing-control input[type="range"] { width: 100%; }
+.timing-scale-presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 9px;
+}
+.timing-scale-presets button {
+  min-height: 38px;
+  border: 1px solid #cbdde8;
+  border-radius: 11px;
+  background: white;
+  color: #163f5c;
+  font-weight: 750;
+  cursor: pointer;
+}
+.timing-scale-presets button.active {
+  border-color: #e88811;
+  background: #fff3df;
+  color: #8d4805;
+  box-shadow: inset 0 0 0 1px rgba(232, 136, 17, .15);
+}
+.text-only-ready-note {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: #eef9f3;
+  color: #246044;
+  font-size: .86rem;
+  line-height: 1.7;
+}
+@media (max-width: 620px) {
+  .timing-scale-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 </style>
   <title>أثر القلم ٨ | السبورة الحرة والرسم المتحرك</title>
 </head>
@@ -1320,7 +1393,7 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
           <label class="upload-zone" id="uploadZone" for="imageInput">
             <span class="upload-symbol" aria-hidden="true">＋</span>
             <strong>اختر صورة أو اسحبها هنا</strong>
-            <small>PNG أو JPG أو WEBP — حتى ٢٠ ميجابايت</small>
+            <small>PNG أو JPG أو WEBP، أو ملف مشروع أثر القلم — الصور حتى ٢٠ ميجابايت</small>
             <input id="imageInput" type="file" accept="image/*,.athar.json,application/json" multiple />
           </label>
 
@@ -1429,7 +1502,20 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
               <strong>PNG وJPG: قلب الخط للرفيع وحدود للممتلئ • SVG: استخدام المسارات الأصلية مباشرة</strong>
               <small>هذه نواة ٨٫٠٫٢: تتعرف على حدود الصورة داخل الهوامش، تقلّل التشظّي، وتكشف الحبر واللون تدريجيًا مع بقاء اليد متزامنة مع رأس القلم.</small>
             </div>
-            <button id="quickAnalyzeBtn" class="primary-button full performance-action" type="button" disabled>إنشاء الرسم بالمحرك الاحترافي</button>
+  
+          <section class="project-mode-card" aria-label="نوع مشروع أثر القلم">
+            <span class="mode-badge">وضع جديد</span>
+            <div class="field-group">
+              <label for="projectModeSelect">محتوى الفيديو</label>
+              <select id="projectModeSelect">
+                <option value="full" selected>الصورة كاملة — كتابة ورسم وتلوين</option>
+                <option value="text-only">كتابة النص فقط — بلا صورة أو رسم أو تلوين</option>
+              </select>
+              <small id="projectModeHint" class="control-hint">الوضع الكامل يحلل الصورة ويرسم عناصرها ثم يلوّنها حسب الإعدادات.</small>
+            </div>
+          </section>
+
+          <button id="quickAnalyzeBtn" class="primary-button full performance-action" type="button" disabled>إنشاء الرسم بالمحرك الاحترافي</button>
           </section>
 
           <div class="two-columns">
@@ -1726,14 +1812,30 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
               <strong>الإجمالي ١٢٠ ث</strong>
             </div>
 
+
+            <div class="manual-timing-control">
+              <div class="label-row">
+                <label for="timingScaleRange">إطالة وقت الكتابة والرسم</label>
+                <output id="timingScaleValue">١٠٠٪ — التوقيت التلقائي</output>
+              </div>
+              <input id="timingScaleRange" type="range" min="50" max="400" step="10" value="100" />
+              <div class="timing-scale-presets" aria-label="اختيارات سريعة لمدة الفيديو">
+                <button type="button" data-timing-scale="100">تلقائي</button>
+                <button type="button" data-timing-scale="150">أبطأ ×١٫٥</button>
+                <button type="button" data-timing-scale="200">أبطأ ×٢</button>
+                <button type="button" data-timing-scale="300">أبطأ ×٣</button>
+              </div>
+              <small class="control-hint">ارفعي النسبة عندما تحتاج الكتابة أو الرسم إلى وقت أطول. يزداد زمن جميع المراحل مع بقاء المسارات والخصائص الأخرى كما هي.</small>
+            </div>
+
             <div class="auto-timing-internals" hidden aria-hidden="true">
               <button id="suggestTimingBtn" type="button">حساب تلقائي</button>
               <output id="textDurationValue">٢٠ ث</output>
-              <input id="textDurationRange" type="range" min="5" max="120" value="20" />
+              <input id="textDurationRange" type="range" min="5" max="300" value="20" />
               <output id="drawDurationValue">٧٥ ث</output>
-              <input id="drawDurationRange" type="range" min="15" max="300" value="75" />
+              <input id="drawDurationRange" type="range" min="15" max="600" value="75" />
               <output id="colorDurationValue">٢٥ ث</output>
-              <input id="colorDurationRange" type="range" min="0" max="120" value="25" />
+              <input id="colorDurationRange" type="range" min="0" max="240" value="25" />
               <output id="travelSpeedValue">١٢٥٪</output>
               <input id="travelSpeedRange" type="range" min="40" max="180" value="125" />
               <output id="finalStrokeHoldValue">٠٫٨ ث</output>
@@ -1920,7 +2022,8 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
             <tr><td><span class="guide-key">إنشاء الرسم المتحرك</span></td><td>يحلل الصورة ويستخرج مسارات الرسم.</td><td>اضغطه بعد تغيير إعدادات استخراج الخطوط.</td></tr>
             <tr><td><span class="guide-key">اختبار ظهور اليد</span></td><td>يعرض اليد والقلم سريعًا للتأكد من الحجم والوضوح.</td><td>لا يشغّل الفيديو كاملًا.</td></tr>
             <tr><td><span class="guide-key">ضبط حركة موصى بها</span></td><td>يعيد إعدادات اليد إلى قيم بطيئة وواضحة ومتوازنة.</td><td>استخدمه عند اضطراب الحركة.</td></tr>
-            <tr><td><span class="guide-key">السرعة التلقائية</span></td><td>تحسب مدة النص والرسم والتلوين حسب تعقيد الصورة.</td><td>لا يحتاج المستخدم إلى اختيار سرعة يدويًا.</td></tr>
+            <tr><td><span class="guide-key">السرعة التلقائية</span></td><td>تحسب مدة النص والرسم والتلوين حسب تعقيد الصورة.</td><td>يمكن إطالة المدة من شريط «إطالة وقت الكتابة والرسم» حتى ٤٠٠٪.</td></tr>
+            <tr><td><span class="guide-key">كتابة النص فقط</span></td><td>يكتب النص المدخل على خلفية نظيفة دون استخدام صورة أو رسم أو تلوين.</td><td>اختاريه من «محتوى الفيديو»، ثم اكتبي النص وشغّلي المعاينة.</td></tr>
             <tr><td><span class="guide-key">الصورة في السبورة</span></td><td>تُحدد وتُنقل بإصبع واحد، وتُصغر أو تُكبر بإصبعين.</td><td>تظهر أيضًا أزرار تصغير وتكبير وتوسيط عند تحديد الصورة.</td></tr>
             <tr><td><span class="guide-key">سلاسة حركة اليد</span></td><td>تخفف الاهتزاز وتقرب الحركة من الانسيابية.</td><td>لا تغيّر سرعة الرسم. القيمة العالية أنعم، والمنخفضة أدق عند الزوايا.</td></tr>
             <tr><td><span class="guide-key">تحديد</span></td><td>اختيار النصوص والصور وتحريكها داخل السبورة.</td><td>اللمس مسموح في هذا الوضع حتى مع تفعيل منع راحة اليد.</td></tr>
@@ -1931,7 +2034,7 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
             <tr><td><span class="guide-key">حفظ الفيديو</span></td><td>تصدير الحركة كملف فيديو.</td><td>تتحدد الصيغة وفق دعم المتصفح.</td></tr>
             <tr><td><span class="guide-key">PNG</span></td><td>حفظ النتيجة النهائية كصورة ثابتة عالية الجودة.</td><td>مناسب للطباعة والمشاركة.</td></tr>
             <tr><td><span class="guide-key">SVG</span></td><td>حفظ الخطوط كرسوم متجهة قابلة للتكبير.</td><td>مفيد للتصميم والتحرير.</td></tr>
-            <tr><td><span class="guide-key">حفظ المشروع</span></td><td>حفظ الصورة والإعدادات والمسارات للمتابعة لاحقًا.</td><td>افتحه لاحقًا من زر اختيار صورة.</td></tr>
+            <tr><td><span class="guide-key">حفظ المشروع</span></td><td>حفظ الصورة والإعدادات والمسارات للمتابعة لاحقًا.</td><td>استعده من زر «اختر صورة» داخل أثر القلم؛ فتحه مباشرة خارج التطبيق قد يعرض بيانات تقنية غير مخصصة للقراءة.</td></tr>
           </tbody>
         </table>
       </div>
@@ -3287,8 +3390,8 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
 </script>
   <script>const ENGINE_WORKER_SOURCE="\"use strict\";\n\n/* أثر القلم ٨٫٠٫٢ — النواة الاحترافية الهجينة\n   خط أنابيب مستقل: خلفية ← قناع حبر ← تنظيف ← مسار مركزي ← شبكة ضربات ← ترتيب بشري ← SVG.\n*/\n\nconst DIR8 = [\n  [0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]\n];\nconst OPP = [4,5,6,7,0,1,2,3];\nconst clamp = (v,a,b) => Math.max(a, Math.min(b,v));\nconst idx = (x,y,w) => y*w+x;\n\nfunction progress(value, label) { self.postMessage({ type:\"progress\", value, label }); }\n\nfunction compositePixels(rgba, width, height) {\n  const count = width * height;\n  const gray = new Uint8Array(count);\n  const chroma = new Uint8Array(count);\n  const rgb = new Uint8ClampedArray(count * 3);\n  for (let p=0, s=0, d=0; p<count; p++, s+=4, d+=3) {\n    const a = rgba[s+3] / 255;\n    const r = rgba[s] * a + 255 * (1-a);\n    const g = rgba[s+1] * a + 255 * (1-a);\n    const b = rgba[s+2] * a + 255 * (1-a);\n    rgb[d]=r; rgb[d+1]=g; rgb[d+2]=b;\n    gray[p]=Math.round(r*0.299+g*0.587+b*0.114);\n    chroma[p]=Math.round(Math.max(r,g,b)-Math.min(r,g,b));\n  }\n  return { gray, chroma, rgb };\n}\n\nfunction median(values) {\n  if (!values.length) return 255;\n  values.sort((a,b)=>a-b);\n  return values[Math.floor(values.length/2)];\n}\n\nfunction detectAnalysisBounds(rgb,gray,width,height) {\n  // عند وضع صورة أفقية داخل إطار عمودي أو العكس، يضيف التطبيق هوامش بيضاء.\n  // هذه الدالة تكتشف مستطيل الصورة الحقيقي كي لا يتحول حدّ الصورة إلى إطار أسود ضخم.\n  const corners=[];\n  const span=Math.max(2,Math.round(Math.min(width,height)*.018));\n  for(let y=0;y<span;y++)for(let x=0;x<span;x++){\n    for(const [sx,sy] of [[x,y],[width-1-x,y],[x,height-1-y],[width-1-x,height-1-y]]){\n      const q=idx(sx,sy,width)*3;corners.push([rgb[q],rgb[q+1],rgb[q+2]]);\n    }\n  }\n  const canvasBg={r:median(corners.map(v=>v[0])),g:median(corners.map(v=>v[1])),b:median(corners.map(v=>v[2]))};\n  // هوامش التطبيق تُرسم بالأبيض الخالص. إذا كانت زوايا اللوحة جزءًا من الصورة\n  // (عاجية أو ملوّنة) فلا نحاول قصها، وإلا قد نفقد نصف الرسم.\n  if(Math.hypot(canvasBg.r-255,canvasBg.g-255,canvasBg.b-255)>7){\n    return {minX:0,minY:0,maxX:width-1,maxY:height-1,width,height,canvasBg};\n  }\n  const rowCoverage=new Float32Array(height),colCoverage=new Float32Array(width);\n  const threshold=8.5;\n  for(let y=0;y<height;y++)for(let x=0;x<width;x++){\n    const q=idx(x,y,width)*3;\n    const diff=Math.hypot(rgb[q]-canvasBg.r,rgb[q+1]-canvasBg.g,rgb[q+2]-canvasBg.b);\n    if(diff>=threshold){rowCoverage[y]++;colCoverage[x]++;}\n  }\n  for(let y=0;y<height;y++)rowCoverage[y]/=width;\n  for(let x=0;x<width;x++)colCoverage[x]/=height;\n  const rowCut=.46,colCut=.46;\n  let minY=0,maxY=height-1,minX=0,maxX=width-1;\n  const ys=[];for(let y=0;y<height;y++)if(rowCoverage[y]>=rowCut)ys.push(y);\n  const xs=[];for(let x=0;x<width;x++)if(colCoverage[x]>=colCut)xs.push(x);\n  if(ys.length>=Math.max(8,height*.18)&&xs.length>=Math.max(8,width*.18)){\n    minY=ys[0];maxY=ys[ys.length-1];minX=xs[0];maxX=xs[xs.length-1];\n    const bw=maxX-minX+1,bh=maxY-minY+1;\n    const areaRatio=bw*bh/(width*height);\n    if(bw<width*.36||bh<height*.18||areaRatio<.10){minX=0;minY=0;maxX=width-1;maxY=height-1;}\n  }\n  return {minX,minY,maxX,maxY,width:maxX-minX+1,height:maxY-minY+1,canvasBg};\n}\n\nfunction estimateBackground(rgb, gray, width, height, bounds) {\n  const minX=bounds?.minX||0,minY=bounds?.minY||0,maxX=bounds?.maxX??width-1,maxY=bounds?.maxY??height-1;\n  const bw=maxX-minX+1,bh=maxY-minY+1;\n  const band = Math.max(3, Math.round(Math.min(bw,bh)*0.045));\n  const rs=[], gs=[], bs=[], ls=[];\n  const stride = Math.max(1, Math.round(Math.max(bw,bh)/300));\n  for (let y=minY; y<=maxY; y+=stride) {\n    for (let x=minX; x<=maxX; x+=stride) {\n      if (x>=minX+band && x<=maxX-band && y>=minY+band && y<=maxY-band) continue;\n      const p=idx(x,y,width), q=p*3;\n      if (gray[p] < 145) continue;\n      rs.push(rgb[q]); gs.push(rgb[q+1]); bs.push(rgb[q+2]); ls.push(gray[p]);\n    }\n  }\n  return { r:median(rs), g:median(gs), b:median(bs), lum:median(ls) };\n}\n\nfunction integralImage(source, width, height) {\n  const out = new Float64Array((width+1)*(height+1));\n  const W=width+1;\n  for (let y=1; y<=height; y++) {\n    let row=0;\n    for (let x=1; x<=width; x++) {\n      row += source[(y-1)*width+x-1];\n      out[y*W+x] = out[(y-1)*W+x] + row;\n    }\n  }\n  return out;\n}\nfunction meanAt(integral,width,height,x,y,radius,bounds) {\n  const W=width+1;\n  const minX=bounds?.minX||0,minY=bounds?.minY||0,maxX=bounds?.maxX??width-1,maxY=bounds?.maxY??height-1;\n  const x1=Math.max(minX,x-radius), y1=Math.max(minY,y-radius);\n  const x2=Math.min(maxX,x+radius), y2=Math.min(maxY,y+radius);\n  const sum=integral[(y2+1)*W+x2+1]-integral[y1*W+x2+1]-integral[(y2+1)*W+x1]+integral[y1*W+x1];\n  return sum/((x2-x1+1)*(y2-y1+1));\n}\n\nfunction buildForegroundMask(rgba,width,height,settings) {\n  const {gray,chroma,rgb}=compositePixels(rgba,width,height);\n  const bounds=detectAnalysisBounds(rgb,gray,width,height);\n  const bg=estimateBackground(rgb,gray,width,height,bounds);\n  const integral=integralImage(gray,width,height);\n  const mask=new Uint8Array(width*height);\n  const radius=Math.max(5, Math.round(Math.min(bounds.width,bounds.height)*0.018));\n  const detail=clamp(Number(settings.detail||82),30,100);\n  const white=clamp(Number(settings.whiteThreshold||250),220,255);\n  const localThreshold=clamp(17-(detail-70)*0.13,7,20);\n  const globalThreshold=clamp(25-(detail-70)*0.16,10,30);\n  const colorThreshold=clamp(27-(detail-70)*0.12,13,30);\n  const xStart=Math.max(1,bounds.minX),xEnd=Math.min(width-2,bounds.maxX);\n  const yStart=Math.max(1,bounds.minY),yEnd=Math.min(height-2,bounds.maxY);\n  for (let y=yStart;y<=yEnd;y++) {\n    for (let x=xStart;x<=xEnd;x++) {\n      const p=idx(x,y,width), q=p*3;\n      const lum=gray[p];\n      if (lum>=white && chroma[p]<9) continue;\n      const local=meanAt(integral,width,height,x,y,radius,bounds)-lum;\n      const dr=rgb[q]-bg.r, dg=rgb[q+1]-bg.g, db=rgb[q+2]-bg.b;\n      const colorDistance=Math.hypot(dr,dg,db);\n      const global=bg.lum-lum;\n      const strongDark=lum<205;\n      const localInk=local>=localThreshold && lum<white;\n      const globalInk=global>=globalThreshold && lum<white;\n      const coloredInk=colorDistance>=colorThreshold && (chroma[p]>=10 || lum<238);\n      if (strongDark || localInk || globalInk || coloredInk) mask[p]=1;\n    }\n  }\n  return {mask,gray,chroma,rgb,bg,bounds};\n}\n\nfunction neighborCount(mask,p,width,height) {\n  const x=p%width, y=(p/width)|0;\n  let n=0;\n  for (const [dx,dy] of DIR8) {\n    const nx=x+dx, ny=y+dy;\n    if (nx>=0&&nx<width&&ny>=0&&ny<height&&mask[idx(nx,ny,width)]) n++;\n  }\n  return n;\n}\n\nfunction morphClose(mask,width,height,iterations=1) {\n  let current=mask;\n  for (let it=0;it<iterations;it++) {\n    const dil=new Uint8Array(mask.length);\n    for (let y=1;y<height-1;y++) for (let x=1;x<width-1;x++) {\n      const p=idx(x,y,width);\n      if (current[p]) { dil[p]=1; continue; }\n      let n=0;\n      for (const [dx,dy] of DIR8) n+=current[idx(x+dx,y+dy,width)]?1:0;\n      if (n>=3 || (current[p-1]&&current[p+1]) || (current[p-width]&&current[p+width])) dil[p]=1;\n    }\n    const ero=new Uint8Array(mask.length);\n    for (let y=1;y<height-1;y++) for (let x=1;x<width-1;x++) {\n      const p=idx(x,y,width);\n      if (!dil[p]) continue;\n      let n=0;\n      for (const [dx,dy] of DIR8) n+=dil[idx(x+dx,y+dy,width)]?1:0;\n      if (n>=2) ero[p]=1;\n    }\n    current=ero;\n  }\n  return current;\n}\n\nfunction components(mask,width,height,minArea=3) {\n  const seen=new Uint8Array(mask.length);\n  const queue=new Int32Array(mask.length);\n  const list=[];\n  for (let start=0; start<mask.length; start++) {\n    if (!mask[start]||seen[start]) continue;\n    let h=0,t=0; queue[t++]=start; seen[start]=1;\n    const pixels=[]; let minX=width,minY=height,maxX=0,maxY=0;\n    while(h<t) {\n      const p=queue[h++]; pixels.push(p);\n      const x=p%width,y=(p/width)|0;\n      minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);\n      for (const [dx,dy] of DIR8) {\n        const nx=x+dx,ny=y+dy;\n        if(nx<0||nx>=width||ny<0||ny>=height) continue;\n        const q=idx(nx,ny,width);\n        if(mask[q]&&!seen[q]){seen[q]=1;queue[t++]=q;}\n      }\n    }\n    if(pixels.length<minArea) continue;\n    const w=maxX-minX+1,hg=maxY-minY+1;\n    list.push({pixels,area:pixels.length,minX,minY,maxX,maxY,width:w,height:hg,density:pixels.length/(w*hg),cx:(minX+maxX)/2,cy:(minY+maxY)/2});\n  }\n  return list;\n}\n\nfunction removeNoise(mask,width,height) {\n  const comps=components(mask,width,height,2);\n  const out=new Uint8Array(mask.length);\n  const minDim=Math.min(width,height);\n  const minArea=Math.max(3,Math.round(minDim*0.006));\n  for(const c of comps) {\n    const longEnough=Math.max(c.width,c.height)>=Math.max(4,minDim*0.007);\n    if(c.area>=minArea||longEnough) for(const p of c.pixels) out[p]=1;\n  }\n  return out;\n}\n\nfunction thinZhangSuen(input,width,height,maxIterations=120) {\n  const m=input.slice();\n  const remove=new Int32Array(m.length);\n  const P=(x,y)=>m[idx(x,y,width)]?1:0;\n  for(let iteration=0;iteration<maxIterations;iteration++) {\n    let changed=0;\n    for(let sub=0;sub<2;sub++) {\n      let count=0;\n      for(let y=1;y<height-1;y++) for(let x=1;x<width-1;x++) {\n        const p=idx(x,y,width); if(!m[p]) continue;\n        const p2=P(x,y-1),p3=P(x+1,y-1),p4=P(x+1,y),p5=P(x+1,y+1);\n        const p6=P(x,y+1),p7=P(x-1,y+1),p8=P(x-1,y),p9=P(x-1,y-1);\n        const n=p2+p3+p4+p5+p6+p7+p8+p9;\n        if(n<2||n>6) continue;\n        const s=(!p2&&p3)+(!p3&&p4)+(!p4&&p5)+(!p5&&p6)+(!p6&&p7)+(!p7&&p8)+(!p8&&p9)+(!p9&&p2);\n        if(s!==1) continue;\n        if(sub===0) {\n          if(p2*p4*p6!==0||p4*p6*p8!==0) continue;\n        } else {\n          if(p2*p4*p8!==0||p2*p6*p8!==0) continue;\n        }\n        remove[count++]=p;\n      }\n      for(let k=0;k<count;k++) m[remove[k]]=0;\n      changed+=count;\n    }\n    if(!changed) break;\n  }\n  return m;\n}\n\nfunction validNeighbors(mask,p,width,height) {\n  const x=p%width,y=(p/width)|0, out=[];\n  for(let d=0;d<8;d++) {\n    const [dx,dy]=DIR8[d],nx=x+dx,ny=y+dy;\n    if(nx<0||nx>=width||ny<0||ny>=height) continue;\n    const q=idx(nx,ny,width); if(!mask[q]) continue;\n    if(dx&&dy && mask[idx(nx,y,width)] && mask[idx(x,ny,width)]) continue;\n    out.push([q,d]);\n  }\n  return out;\n}\n\nfunction pruneSpurs(skeleton,width,height,limit) {\n  const m=skeleton.slice();\n  const maxPass=4;\n  for(let pass=0;pass<maxPass;pass++) {\n    const degree=new Uint8Array(m.length), endpoints=[];\n    for(let p=0;p<m.length;p++) if(m[p]) { degree[p]=validNeighbors(m,p,width,height).length; if(degree[p]===1) endpoints.push(p); }\n    const kill=new Uint8Array(m.length);\n    let removed=0;\n    for(const start of endpoints) {\n      if(!m[start]) continue;\n      const chain=[start]; let prev=-1,cur=start;\n      while(chain.length<=limit) {\n        const ns=validNeighbors(m,cur,width,height).map(x=>x[0]).filter(q=>q!==prev);\n        if(!ns.length) break;\n        const next=ns[0]; prev=cur; cur=next; chain.push(cur);\n        if(degree[cur]!==2) break;\n      }\n      if(chain.length<=limit && degree[cur]>=3) {\n        for(let i=0;i<chain.length-1;i++) kill[chain[i]]=1;\n      }\n    }\n    for(let p=0;p<kill.length;p++) if(kill[p]){m[p]=0;removed++;}\n    if(!removed) break;\n  }\n  return m;\n}\n\nfunction traceGraph(skeleton,width,height) {\n  const degree=new Uint8Array(skeleton.length), active=[];\n  for(let p=0;p<skeleton.length;p++) if(skeleton[p]) { degree[p]=validNeighbors(skeleton,p,width,height).length; active.push(p); }\n  const visited=new Uint8Array(skeleton.length);\n  const isSeen=(p,d)=>Boolean(visited[p]&(1<<d));\n  const mark=(p,d,q)=>{visited[p]|=1<<d;visited[q]|=1<<OPP[d];};\n  const paths=[];\n  function walk(start,first,dir) {\n    const out=[[start%width+.5,(start/width|0)+.5]];\n    let prev=start,cur=first; mark(start,dir,cur); out.push([cur%width+.5,(cur/width|0)+.5]);\n    let guard=0;\n    while(guard++<skeleton.length) {\n      if(degree[cur]!==2) break;\n      const next=validNeighbors(skeleton,cur,width,height).find(([q,d])=>q!==prev&&!isSeen(cur,d));\n      if(!next) break;\n      mark(cur,next[1],next[0]); prev=cur;cur=next[0]; out.push([cur%width+.5,(cur/width|0)+.5]);\n    }\n    return out;\n  }\n  for(const start of active) if(degree[start]!==2) {\n    for(const [q,d] of validNeighbors(skeleton,start,width,height)) if(!isSeen(start,d)) paths.push(walk(start,q,d));\n  }\n  for(const start of active) {\n    for(const [q,d] of validNeighbors(skeleton,start,width,height)) if(!isSeen(start,d)) paths.push(walk(start,q,d));\n  }\n  return paths;\n}\n\n\nfunction buildComponentLabels(comps,size) {\n  const labels=new Int32Array(size);labels.fill(-1);\n  for(let i=0;i<comps.length;i++)for(const p of comps[i].pixels)labels[p]=i;\n  return labels;\n}\n\nfunction componentForPath(path,labels,width,height) {\n  const counts=new Map();\n  const stride=Math.max(1,Math.floor(path.length/18));\n  for(let i=0;i<path.length;i+=stride){\n    const x=clamp(Math.round(path[i][0]-.5),0,width-1),y=clamp(Math.round(path[i][1]-.5),0,height-1);\n    let id=labels[idx(x,y,width)];\n    if(id<0){\n      for(let r=1;r<=2&&id<0;r++)for(let oy=-r;oy<=r&&id<0;oy++)for(let ox=-r;ox<=r;ox++){\n        const nx=x+ox,ny=y+oy;if(nx<0||nx>=width||ny<0||ny>=height)continue;\n        const candidate=labels[idx(nx,ny,width)];if(candidate>=0){id=candidate;break;}\n      }\n    }\n    if(id>=0)counts.set(id,(counts.get(id)||0)+1);\n  }\n  let best=-1,bestCount=0;for(const [id,count] of counts)if(count>bestCount){best=id;bestCount=count;}\n  return best;\n}\n\nfunction buildBoundaryMask(mask,width,height) {\n  const out=new Uint8Array(mask.length);\n  for(let y=1;y<height-1;y++)for(let x=1;x<width-1;x++){\n    const p=idx(x,y,width);if(!mask[p])continue;\n    if(!mask[p-1]||!mask[p+1]||!mask[p-width]||!mask[p+width])out[p]=1;\n  }\n  return out;\n}\n\nfunction chaikin(path,closed=false) {\n  if(path.length<4)return path;\n  const core=closed&&Math.hypot(path[0][0]-path[path.length-1][0],path[0][1]-path[path.length-1][1])<3?path.slice(0,-1):path;\n  const out=[];\n  if(!closed)out.push(core[0]);\n  const limit=closed?core.length:core.length-1;\n  for(let i=0;i<limit;i++){\n    const a=core[i],b=core[(i+1)%core.length];\n    out.push([a[0]*.75+b[0]*.25,a[1]*.75+b[1]*.25]);\n    out.push([a[0]*.25+b[0]*.75,a[1]*.25+b[1]*.75]);\n  }\n  if(!closed)out.push(core[core.length-1]);\n  else out.push(out[0]);\n  return out;\n}\n\nfunction refineRoute(path,tolerance) {\n  if(path.length<2)return path;\n  const closed=Math.hypot(path[0][0]-path[path.length-1][0],path[0][1]-path[path.length-1][1])<3;\n  let refined=simplify(path,tolerance);\n  if(refined.length>=5)refined=chaikin(refined,closed);\n  return refined;\n}\n\nfunction mergeRouteItems(items,width,height,continuity) {\n  const groups=new Map();\n  for(const item of items){const key=`${item.componentId}:${item.mode}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item.path);}\n  const out=[];\n  for(const [key,paths] of groups){\n    const [componentId,mode]=key.split(':');\n    const merged=mode==='centerline'?mergeStrokes(paths,width,height,continuity):mergeStrokes(paths,width,height,Math.min(54,Number(continuity||78)));\n    for(const path of merged)out.push({path,componentId:Number(componentId),mode});\n  }\n  return out;\n}\n\nfunction orderRouteItems(items,comps,width,height) {\n  const groups=new Map();\n  for(const item of items){const key=item.componentId;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item);}\n  const rowSize=Math.max(16,height*.075);\n  const orderedGroups=[...groups.entries()].sort((a,b)=>{\n    const ca=comps[a[0]]||{minY:height,maxX:0,area:0,cy:height},cb=comps[b[0]]||{minY:height,maxX:0,area:0,cy:height};\n    const ra=Math.floor(ca.cy/rowSize),rb=Math.floor(cb.cy/rowSize);\n    return ra-rb||ca.minY-cb.minY||cb.maxX-ca.maxX||cb.area-ca.area;\n  });\n  const output=[];let globalCursor=[width*.86,height*.025];\n  for(const [componentId,group] of orderedGroups){\n    const pending=group.slice();\n    const c=comps[componentId]||{maxX:globalCursor[0],minY:globalCursor[1]};\n    let cursor=output.length?globalCursor:[c.maxX,c.minY];\n    let previousDir=[0,1];\n    while(pending.length){\n      let bestIndex=0,bestReverse=false,bestPath=null,bestScore=Infinity;\n      for(let i=0;i<pending.length;i++){\n        let p=rotateClosedPath(pending[i].path,cursor);const f=p[0],l=p[p.length-1];\n        const df=Math.hypot(f[0]-cursor[0],f[1]-cursor[1]),dl=Math.hypot(l[0]-cursor[0],l[1]-cursor[1]);\n        const dirF=direction(p,true),dirL=direction(p,false);\n        const sf=df+anglePenalty(previousDir,[-dirF[0],-dirF[1]])*2.2;\n        const sl=dl+anglePenalty(previousDir,dirL)*2.2;\n        if(Math.min(sf,sl)<bestScore){bestScore=Math.min(sf,sl);bestIndex=i;bestReverse=sl<sf;bestPath=p;}\n      }\n      const item=pending.splice(bestIndex,1)[0];let path=bestPath||item.path;\n      if(bestReverse)path=path.slice().reverse();\n      output.push({...item,path});cursor=path[path.length-1];globalCursor=cursor;previousDir=direction(path,false);\n    }\n  }\n  return output;\n}\n\nfunction buildHybridRoutes(mask,skeleton,comps,width,height,settings) {\n  const labels=buildComponentLabels(comps,mask.length);\n  const centerRaw=traceGraph(skeleton,width,height);\n  let boundary=buildBoundaryMask(mask,width,height);\n  boundary=thinZhangSuen(boundary,width,height,36);\n  const contourRaw=traceGraph(boundary,width,height);\n  const centers=new Map(),contours=new Map();\n  for(const path of centerRaw){const id=componentForPath(path,labels,width,height);if(id>=0){if(!centers.has(id))centers.set(id,[]);centers.get(id).push(path);}}\n  for(const path of contourRaw){const id=componentForPath(path,labels,width,height);if(id>=0){if(!contours.has(id))contours.set(id,[]);contours.get(id).push(path);}}\n  const items=[];let filledCount=0;\n  const smoothing=clamp(Number(settings.smoothing||1),0,4);\n  const minLength=Math.max(2.5,Number(settings.minLength||3));\n  for(let id=0;id<comps.length;id++){\n    const c=comps[id],centerPaths=centers.get(id)||[],contourPaths=contours.get(id)||[];\n    const centerLength=centerPaths.reduce((s,p)=>s+pathLength(p),0);\n    const estimatedWidth=c.area/Math.max(1,centerLength);\n    const minSide=Math.min(c.width,c.height);\n    const substantial=minSide>=7&&c.area>=18;\n    // الخطوط الرفيعة والمتوسطة تبقى ضربة مركزية واحدة. لا نستخدم المحيط إلا عندما\n    // تدل السماكة أو كثافة المساحة بوضوح على شكل ممتلئ حقيقي.\n    const filled=substantial&&(estimatedWidth>=5.35||(c.density>=.52&&minSide>=9));\n    if(filled)filledCount++;\n    const chosen=filled&&contourPaths.length?contourPaths:centerPaths;\n    const mode=filled&&contourPaths.length?'contour':'centerline';\n    const tolerance=(mode==='contour'?.68:.48)+smoothing*.16;\n    for(const path of chosen){\n      const refined=refineRoute(path,tolerance);\n      if(refined.length>=2&&pathLength(refined)>=minLength)items.push({path:refined,componentId:id,mode,estimatedWidth});\n    }\n  }\n  let merged=mergeRouteItems(items,width,height,settings.continuity||78);\n  merged=merged.map(item=>({...item,path:refineRoute(item.path,item.mode==='contour'?.55:.42)}))\n    .filter(item=>item.path.length>=2&&pathLength(item.path)>=minLength);\n  const ordered=orderRouteItems(merged,comps,width,height);\n  return {routes:ordered,filledCount};\n}\n\nfunction pointLineDistance(p,a,b) {\n  const dx=b[0]-a[0],dy=b[1]-a[1];\n  if(!dx&&!dy) return Math.hypot(p[0]-a[0],p[1]-a[1]);\n  const t=clamp(((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy),0,1);\n  return Math.hypot(p[0]-(a[0]+t*dx),p[1]-(a[1]+t*dy));\n}\nfunction simplify(points,tolerance) {\n  if(points.length<4) return points;\n  const keep=new Uint8Array(points.length); keep[0]=keep[points.length-1]=1;\n  const stack=[[0,points.length-1]];\n  while(stack.length) {\n    const [a,b]=stack.pop(); let best=-1,max=0;\n    for(let i=a+1;i<b;i++) { const d=pointLineDistance(points[i],points[a],points[b]); if(d>max){max=d;best=i;} }\n    if(best>0&&max>tolerance){keep[best]=1;stack.push([a,best],[best,b]);}\n  }\n  return points.filter((_,i)=>keep[i]);\n}\nfunction pathLength(path){let l=0;for(let i=1;i<path.length;i++)l+=Math.hypot(path[i][0]-path[i-1][0],path[i][1]-path[i-1][1]);return l;}\nfunction direction(path,start=true) {\n  if(path.length<2)return[0,0];\n  const a=start?path[Math.min(2,path.length-1)]:path[Math.max(0,path.length-3)];\n  const b=start?path[0]:path[path.length-1];\n  const dx=b[0]-a[0],dy=b[1]-a[1],n=Math.hypot(dx,dy)||1;return[dx/n,dy/n];\n}\nfunction anglePenalty(a,b){return 1-clamp(a[0]*b[0]+a[1]*b[1],-1,1);}\n\nfunction mergeStrokes(paths,width,height,continuity) {\n  const maxGap=clamp(1.3+Number(continuity||78)*0.025,2,4.2);\n  const used=new Uint8Array(paths.length),out=[];\n  for(let i=0;i<paths.length;i++) {\n    if(used[i])continue; used[i]=1; let cur=paths[i].slice();\n    for(let round=0;round<30;round++) {\n      const a=cur[0],b=cur[cur.length-1],da=direction(cur,true),db=direction(cur,false);\n      let best=null;\n      for(let j=0;j<paths.length;j++) if(!used[j]) {\n        const p=paths[j],c=p[0],d=p[p.length-1],dc=direction(p,true),dd=direction(p,false);\n        const opts=[\n          [\"bs\",Math.hypot(b[0]-c[0],b[1]-c[1]),anglePenalty(db,[-dc[0],-dc[1]])],\n          [\"be\",Math.hypot(b[0]-d[0],b[1]-d[1]),anglePenalty(db,dd)],\n          [\"as\",Math.hypot(a[0]-c[0],a[1]-c[1]),anglePenalty(da,dc)],\n          [\"ae\",Math.hypot(a[0]-d[0],a[1]-d[1]),anglePenalty(da,[-dd[0],-dd[1]])]\n        ];\n        for(const [mode,gap,turn] of opts) {\n          if(gap>maxGap||turn>0.85) continue;\n          const score=gap+turn*1.8;\n          if(!best||score<best.score)best={j,mode,score};\n        }\n      }\n      if(!best)break;\n      used[best.j]=1; let p=paths[best.j];\n      if(best.mode===\"bs\") cur=cur.concat(p.slice(1));\n      if(best.mode===\"be\") cur=cur.concat(p.slice().reverse().slice(1));\n      if(best.mode===\"as\") cur=p.slice().reverse().concat(cur.slice(1));\n      if(best.mode===\"ae\") cur=p.concat(cur.slice(1));\n    }\n    out.push(cur);\n  }\n  return out;\n}\n\nfunction rotateClosedPath(path,target) {\n  if(path.length<4) return path;\n  const closed=Math.hypot(path[0][0]-path[path.length-1][0],path[0][1]-path[path.length-1][1])<3;\n  if(!closed)return path;\n  let best=0,score=Infinity;\n  for(let i=0;i<path.length-1;i++) {\n    const s=Math.hypot(path[i][0]-target[0],path[i][1]-target[1]);\n    if(s<score){score=s;best=i;}\n  }\n  const core=path.slice(0,-1);\n  const rotated=core.slice(best).concat(core.slice(0,best));\n  rotated.push(rotated[0]); return rotated;\n}\n\nfunction orderStrokes(paths,width,height) {\n  const pending=paths.map((p,i)=>({p,i,l:pathLength(p)}));\n  const result=[]; let cursor=[width*.84,height*.035], previousDir=[0,1];\n  while(pending.length) {\n    let bestIndex=0,bestReverse=false,bestScore=Infinity;\n    const limit=Math.min(pending.length,320);\n    for(let i=0;i<limit;i++) {\n      let p=rotateClosedPath(pending[i].p,cursor);\n      const f=p[0],l=p[p.length-1];\n      const df=Math.hypot(f[0]-cursor[0],f[1]-cursor[1]);\n      const dl=Math.hypot(l[0]-cursor[0],l[1]-cursor[1]);\n      const dirF=direction(p,true),dirL=direction(p,false);\n      const rowBias=Math.max(0,(Math.min(f[1],l[1])-cursor[1]))*.018;\n      const longBonus=Math.min(18,pending[i].l*.012);\n      const sf=df+anglePenalty(previousDir,[-dirF[0],-dirF[1]])*3+rowBias-longBonus;\n      const sl=dl+anglePenalty(previousDir,dirL)*3+rowBias-longBonus;\n      if(Math.min(sf,sl)<bestScore){bestScore=Math.min(sf,sl);bestIndex=i;bestReverse=sl<sf;}\n    }\n    const item=pending.splice(bestIndex,1)[0];\n    let path=rotateClosedPath(item.p,cursor);\n    if(bestReverse)path=path.slice().reverse();\n    result.push(path);cursor=path[path.length-1];previousDir=direction(path,false);\n  }\n  return result;\n}\n\nfunction textRegionsFromComponents(comps,width,height) {\n  const candidates=comps.filter(c=>{\n    const h=c.height/height,w=c.width/width,aspect=c.width/Math.max(1,c.height);\n    return h<.105&&w<.70&&c.area>4&&c.density<.72&&aspect>.22;\n  }).sort((a,b)=>a.cy-b.cy||b.cx-a.cx);\n  const lines=[];\n  for(const c of candidates) {\n    let line=lines.find(r=>Math.abs(r.cy-c.cy)<=Math.max(3,Math.max(r.h,c.height)*.58));\n    if(!line){line={boxes:[],minX:c.minX,maxX:c.maxX,minY:c.minY,maxY:c.maxY,cy:c.cy,h:c.height,area:0};lines.push(line);}\n    line.boxes.push(c);line.area+=c.area;\n    line.minX=Math.min(line.minX,c.minX);line.maxX=Math.max(line.maxX,c.maxX);\n    line.minY=Math.min(line.minY,c.minY);line.maxY=Math.max(line.maxY,c.maxY);\n    line.cy=line.boxes.reduce((s,b)=>s+b.cy,0)/line.boxes.length;line.h=line.maxY-line.minY+1;\n  }\n  const pad=Math.max(2,Math.round(Math.min(width,height)*.004));\n  return lines.filter(l=>{\n    const lineWidth=l.maxX-l.minX+1,lineHeight=l.maxY-l.minY+1;\n    const aspect=lineWidth/Math.max(1,lineHeight);\n    const enoughGlyphs=l.boxes.length>=3;\n    const strongLine=l.boxes.length>=2&&aspect>=1.75&&lineWidth>=width*.055;\n    return (enoughGlyphs||strongLine)&&lineHeight<height*.12&&l.area>=8;\n  }).map(l=>({\n    x:Math.max(0,l.minX-pad)/width,\n    y:Math.max(0,l.minY-pad)/height,\n    width:(Math.min(width,l.maxX+pad+1)-Math.max(0,l.minX-pad))/width,\n    height:(Math.min(height,l.maxY+pad+1)-Math.max(0,l.minY-pad))/height,\n    automatic:true\n  })).sort((a,b)=>a.y-b.y||b.x-a.x).slice(0,48);\n}\n\nfunction colorMaskAndRegions(rgba,gray,chroma,foregroundMask,width,height,bg,textRegions,naturalMode=false) {\n  // في الرسم الطبيعي يُعامل النص كجزء من الصورة، لذلك تدخل كل العناصر في التلوين التدريجي.\n  // في أوضاع النص المنفصل نستبعد مناطق النص من فرشاة اللون كي لا تتكرر فوق مرحلة الكتابة.\n  const mask=foregroundMask.slice();\n  const activeTextRegions=naturalMode?[]:textRegions;\n  const insideText=(x,y)=>activeTextRegions.some(r=>x/width>=r.x&&x/width<=r.x+r.width&&y/height>=r.y&&y/height<=r.y+r.height);\n  if(activeTextRegions.length) {\n    const pad=Math.max(2,Math.round(Math.min(width,height)*.004));\n    for(let y=0;y<height;y++)for(let x=0;x<width;x++){\n      if(insideText(x,y)) {\n        for(let oy=-pad;oy<=pad;oy++)for(let ox=-pad;ox<=pad;ox++){\n          const nx=x+ox,ny=y+oy;if(nx>=0&&nx<width&&ny>=0&&ny<height)mask[idx(nx,ny,width)]=0;\n        }\n      }\n    }\n  }\n  // لا نغلق الفجوات هنا؛ إغلاقها كان يدمج أجزاء الشعار المتجاورة في منطقة لون ضخمة.\n  const cleaned=removeNoise(mask,width,height);\n  const comps=components(cleaned,width,height,5)\n    .filter(c=>c.area>=5&&Math.max(c.width,c.height)>=3)\n    .sort((a,b)=>a.minY-b.minY||b.maxX-a.maxX||b.area-a.area)\n    .slice(0,96);\n  const pad=Math.max(2,Math.round(Math.min(width,height)*.005));\n  const regions=comps.map(c=>({\n    x:Math.max(0,c.minX-pad)/width,\n    y:Math.max(0,c.minY-pad)/height,\n    width:(Math.min(width,c.maxX+pad+1)-Math.max(0,c.minX-pad))/width,\n    height:(Math.min(height,c.maxY+pad+1)-Math.max(0,c.minY-pad))/height,\n    area:c.area\n  }));\n  return {mask:cleaned,regions};\n}\n\nfunction svgFromPaths(paths,width,height) {\n  const esc=n=>Number(n.toFixed(2));\n  const d=paths.map(path=>`M ${esc(path[0][0])} ${esc(path[0][1])} `+path.slice(1).map(p=>`L ${esc(p[0])} ${esc(p[1])}`).join(\" \")).join(\"\\n\");\n  return `<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ${width} ${height}\" width=\"${width}\" height=\"${height}\"><g fill=\"none\" stroke=\"#17222c\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"${d}\"/></g></svg>`;\n}\n\nself.onmessage=(event)=>{\n  const m=event.data||{}; if(m.type!==\"analyze\")return;\n  try{\n    const width=Number(m.width),height=Number(m.height),rgba=new Uint8ClampedArray(m.buffer),settings=m.settings||{};\n    if(!width||!height||rgba.length!==width*height*4)throw new Error(\"بيانات الصورة غير صالحة.\");\n    progress(7,\"قراءة الصورة وتقدير الخلفية…\");\n    let {mask,gray,chroma,bg}=buildForegroundMask(rgba,width,height,settings);\n    progress(20,\"تنظيف الضوضاء وربط الانقطاعات الصغيرة…\");\n    mask=removeNoise(morphClose(mask,width,height,1),width,height);\n    const comps=components(mask,width,height,3);\n    const textRegions=textRegionsFromComponents(comps,width,height);\n    progress(34,\"استخراج المسار المركزي وحدود الأشكال الممتلئة…\");\n    let skeleton=thinZhangSuen(mask,width,height,120);\n    const spurLimit=Math.max(3,Math.round(Math.min(width,height)*.008));\n    skeleton=pruneSpurs(skeleton,width,height,spurLimit);\n    progress(54,\"بناء مسارات هجينة: قلب الخط للأجزاء الرفيعة وحدود للأجزاء الممتلئة…\");\n    const hybrid=buildHybridRoutes(mask,skeleton,comps,width,height,settings);\n    const routeItems=hybrid.routes;\n    const paths=routeItems.map(item=>item.path);\n    const pathModes=routeItems.map(item=>item.mode);\n    const pathComponentIds=routeItems.map(item=>item.componentId);\n    progress(76,\"ترتيب المكوّنات والضربات بحركة بشرية متصلة…\");\n    progress(89,\"إنشاء قناع التلوين الدقيق وملف SVG…\");\n    const {mask:colorMask,regions:colorRegions}=colorMaskAndRegions(rgba,gray,chroma,mask,width,height,bg,textRegions,Boolean(settings.naturalMode));\n    const svg=svgFromPaths(paths,width,height);\n    const totalLength=paths.reduce((s,p)=>s+pathLength(p),0);\n    const travelLength=paths.slice(1).reduce((s,p,i)=>{const a=paths[i][paths[i].length-1],b=p[0];return s+Math.hypot(a[0]-b[0],a[1]-b[1]);},0);\n    const contourPathCount=pathModes.filter(mode=>mode===\"contour\").length;\n    const stats={engine:\"athar-pro-hybrid\",engineVersion:\"8.0.2\",pathCount:paths.length,pointCount:paths.reduce((s,p)=>s+p.length,0),componentCount:comps.length,textRegionCount:textRegions.length,colorRegionCount:colorRegions.length,totalLength:Math.round(totalLength),travelLength:Math.round(travelLength),travelRatio:Number((travelLength/Math.max(1,totalLength)).toFixed(3)),centerlinePathCount:paths.length-contourPathCount,contourPathCount,filledComponentCount:hybrid.filledCount,hybrid:true,svgReady:true};\n    self.postMessage({type:\"done\",paths,pathModes,pathComponentIds,revealBuffer:mask.buffer,colorMaskBuffer:colorMask.buffer,maskWidth:width,maskHeight:height,textRegions,colorRegions,svg,stats},[mask.buffer,colorMask.buffer]);\n  }catch(error){self.postMessage({type:\"error\",message:error?.message||\"تعذر تشغيل نواة أثر القلم الاحترافية الهجينة.\"});}\n};\n";function createEmbeddedEngineWorker(){return new Worker(URL.createObjectURL(new Blob([ENGINE_WORKER_SOURCE],{type:"text/javascript"})));}</script><script>"use strict";
 
-const APP_VERSION = "8.0.2";
-const SETTINGS_KEY = "athar-alqalam-settings-v802-pro-corrected";
+const APP_VERSION = "8.0.5";
+const SETTINGS_KEY = "athar-alqalam-settings-v805-flex-time-text-only";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -3323,14 +3426,14 @@ const controls = {
   brightness: $("#brightnessRange"), contrast: $("#contrastRange"), extraction: $("#extractionSelect"), whiteThreshold: $("#whiteThresholdRange"),
   engine: $("#engineSelect"), continuity: $("#continuityRange"), strokeRender: $("#strokeRenderSelect"),
   style: $("#styleSelect"), customColor: $("#customColor"), background: $("#backgroundSelect"), order: $("#orderSelect"),
-  sequence: $("#sequenceSelect"), textDetection: $("#textDetectionSelect"), textRender: $("#textRenderSelect"),
+  projectMode: $("#projectModeSelect"), sequence: $("#sequenceSelect"), textDetection: $("#textDetectionSelect"), textRender: $("#textRenderSelect"),
   textMotion: $("#textMotionSelect"), textSourceMode: $("#textSourceModeSelect"), typedText: $("#typedTextInput"), handLife: $("#handLifeRange"), wordPause: $("#wordPauseRange"),
   textSensitivity: $("#textSensitivityRange"), textBoost: $("#textBoostRange"), textInk: $("#textInkSelect"),
   detail: $("#detailRange"), smooth: $("#smoothRange"), line: $("#lineRange"), minPath: $("#minPathRange"),
   hand: $("#handSelect"), shadow: $("#shadowToggle"), handSize: $("#handSizeRange"), handOpacity: $("#handOpacityRange"),
   handAngle: $("#handAngleRange"), handSmooth: $("#handSmoothRange"), penLift: $("#penLiftRange"), finish: $("#finishSelect"), quality: $("#qualitySelect"),
   fps: $("#fpsSelect"), max1080: $("#max1080Toggle"), endBlur: $("#endBlurRange"),
-  textDuration: $("#textDurationRange"), drawDuration: $("#drawDurationRange"), colorDuration: $("#colorDurationRange"),
+  textDuration: $("#textDurationRange"), drawDuration: $("#drawDurationRange"), colorDuration: $("#colorDurationRange"), timingScale: $("#timingScaleRange"),
   travelSpeed: $("#travelSpeedRange"), finalStrokeHold: $("#finalStrokeHoldRange"), hold: $("#holdRange"),
   fadeOut: $("#fadeOutToggle"), fadeOutDuration: $("#fadeOutDurationRange"),
   title: $("#titleInput"), subtitle: $("#subtitleInput"), brand: $("#brandToggle"), owner: $("#ownerInput"),
@@ -3390,9 +3493,9 @@ const styleColors = {
 const defaultSettings = {
   ratio: "16:9", fit: "contain", zoom: "100", offsetX: "0", offsetY: "0", brightness: "100", contrast: "100",
   extraction: "balanced", whiteThreshold: "250", engine: "professional", continuity: "78", strokeRender: "source", style: "graphite", customColor: "#15395f", background: "#ffffff", order: "smart",
-  sequence: "natural", textDetection: "auto", textRender: "original", textMotion: "natural", textSourceMode: "image", typedText: "", handLife: "58", wordPause: "0.2", textSensitivity: "86", textBoost: "190", textInk: "source", detail: "76", smooth: "1",
+  projectMode: "full", sequence: "natural", textDetection: "auto", textRender: "original", textMotion: "natural", textSourceMode: "image", typedText: "", handLife: "58", wordPause: "0.2", textSensitivity: "86", textBoost: "190", textInk: "source", detail: "76", smooth: "1",
   line: "2.4", minPath: "3", hand: "hand", shadow: true, handSize: "125", handOpacity: "100", handAngle: "0", handSmooth: "62", penLift: "92",
-  finish: "color", quality: "720", fps: "30", max1080: true, endBlur: "3", textDuration: "20", drawDuration: "90", colorDuration: "25", travelSpeed: "125", finalStrokeHold: "0.8", hold: "3", fadeOut: false, fadeOutDuration: "1.2",
+  finish: "color", quality: "720", fps: "30", max1080: true, endBlur: "3", textDuration: "20", drawDuration: "90", colorDuration: "25", timingScale: "100", travelSpeed: "125", finalStrokeHold: "0.8", hold: "3", fadeOut: false, fadeOutDuration: "1.2",
   title: "", subtitle: "", brand: true, owner: "أ/ فاطمة هزازي", forum: "ملتقى التعليم التفاعلي (تفاعل)",
   community: "ملتقى معلمي ومعلمات الرياضيات", brandSize: "2", endCard: false,
   phaseSequence: ["text", "draw", "color"]
@@ -3511,46 +3614,146 @@ function setBusy(busy, message = "جاري المعالجة…") {
 }
 
 function refreshButtons() {
+  const textOnly = isTextOnlyProject();
   const hasImage = Boolean(state.image);
-  const hasDrawing = state.paths.length > 0;
+  const hasText = hasTextOnlyContent();
+  const hasContent = hasPlayableContent();
   const locked = state.busy || state.isAnimating || state.batchExporting;
 
-  buttons.prepare.disabled = !hasImage || locked;
-  if (buttons.quickAnalyze) buttons.quickAnalyze.disabled = !hasImage || locked;
-  buttons.play.disabled = !hasDrawing || locked;
+  buttons.prepare.disabled = (textOnly ? !hasText : !hasImage) || locked;
+  if (buttons.quickAnalyze) buttons.quickAnalyze.disabled = (textOnly ? !hasText : !hasImage) || locked;
+  buttons.play.disabled = !hasContent || locked;
   buttons.pause.disabled = !state.isAnimating || state.recording;
-  buttons.restart.disabled = !hasDrawing || state.busy || state.recording;
-  buttons.video.disabled = !hasDrawing || locked;
-  buttons.png.disabled = !hasDrawing || locked;
-  buttons.svg.disabled = !hasDrawing || locked;
-  buttons.project.disabled = !hasImage || locked;
-  buttons.showOriginal.disabled = !hasImage || locked;
+  buttons.restart.disabled = !hasContent || state.busy || state.recording;
+  buttons.video.disabled = !hasContent || locked;
+  buttons.png.disabled = !hasContent || locked;
+  buttons.svg.disabled = !hasContent || locked;
+  buttons.project.disabled = !(hasImage || hasText) || locked;
+  buttons.showOriginal.disabled = !hasImage || textOnly || locked;
   buttons.batchPrev.disabled = locked || state.batchIndex <= 0;
   buttons.batchNext.disabled = locked || state.batchIndex >= state.batchFiles.length - 1;
-  buttons.batchExport.disabled = locked || state.batchFiles.length < 2;
+  buttons.batchExport.disabled = locked || state.batchFiles.length < 2 || textOnly;
   buttons.batchClear.disabled = locked || state.batchFiles.length < 2;
 
-  $$(".editor-card input, .editor-card select").forEach((element) => {
-    if (element === imageInput) element.disabled = locked;
-    else element.disabled = locked;
+  $$(".editor-card input, .editor-card select, .editor-card textarea").forEach((element) => {
+    element.disabled = locked;
   });
+  if (controls.finish) controls.finish.disabled = locked || textOnly;
+  if (controls.textSourceMode) controls.textSourceMode.disabled = locked || textOnly;
+  if (controls.projectMode) controls.projectMode.disabled = locked;
   buttons.resetAdjust.disabled = locked;
   if (buttons.testHand) buttons.testHand.disabled = locked;
   if (buttons.resetMotion) buttons.resetMotion.disabled = locked;
 }
 
-
 function clampNumber(value, min, max) {
   return Math.max(min, Math.min(max, Number(value)));
 }
 
+function isTextOnlyProject() {
+  return controls.projectMode?.value === "text-only";
+}
+
+function hasTextOnlyContent() {
+  return isTextOnlyProject() && getTypedTextLines().length > 0;
+}
+
+function hasPlayableContent() {
+  return isTextOnlyProject() ? hasTextOnlyContent() : state.paths.length > 0;
+}
+
+function roundTenth(value) {
+  return Math.round(Number(value || 0) * 10) / 10;
+}
+
+function updateTextOnlyProjectName() {
+  if (!isTextOnlyProject()) return;
+  const firstLine = getTypedTextLines()[0] || "مشروع نصي";
+  state.imageName = firstLine.slice(0, 44) || "مشروع نصي";
+  projectName.textContent = state.imageName;
+}
+
+function syncProjectModeUI({ announce = false, openTextSettings = false } = {}) {
+  const textOnly = isTextOnlyProject();
+  document.body.classList.toggle("text-only-project", textOnly);
+  const hint = $("#projectModeHint");
+  const emptyTitle = emptyState?.querySelector("strong");
+  const emptyCopy = emptyState?.querySelector("p");
+
+  if (textOnly) {
+    controls.textSourceMode.value = "typed";
+    controls.textRender.value = "original";
+    controls.sequence.value = "text-draw-color";
+    controls.finish.value = "outline";
+    state.phaseSequence = ["text", "draw", "color"];
+    if (hint) hint.textContent = "يكتب النص الذي تدخلينه على خلفية نظيفة، من دون عرض صورة أو رسم الأشكال أو تنفيذ التلوين.";
+    if (emptyTitle) emptyTitle.textContent = "ابدئي بالنص";
+    if (emptyCopy) emptyCopy.textContent = "اكتبي النص في تبويب الرسم، ثم شغّلي المعاينة أو احفظي الفيديو.";
+    buttons.prepare.textContent = "تجهيز كتابة النص";
+    if (buttons.quickAnalyze) buttons.quickAnalyze.textContent = "تجهيز كتابة النص فقط";
+    updateTextOnlyProjectName();
+    if (openTextSettings) {
+      const details = controls.typedText?.closest("details.settings-accordion");
+      if (details) details.open = true;
+      setTimeout(() => controls.typedText?.focus({ preventScroll: false }), 0);
+    }
+  } else {
+    if (hint) hint.textContent = "الوضع الكامل يحلل الصورة ويرسم عناصرها ثم يلوّنها حسب الإعدادات.";
+    if (emptyTitle) emptyTitle.textContent = "ابدأ بصورة";
+    if (emptyCopy) emptyCopy.textContent = "ارفع صورة أو جرّب شعار الملتقى، ثم أنشئ الرسم.";
+    buttons.prepare.textContent = "إنشاء الرسم المتحرك";
+    if (buttons.quickAnalyze) buttons.quickAnalyze.textContent = "إنشاء الرسم بالمحرك الاحترافي";
+  }
+
+  syncPhaseSequenceFromSelect();
+  renderPhaseSequenceEditor();
+  updateTextRegionStatus();
+  updateLabels();
+  refreshButtons();
+
+  if (hasPlayableContent()) drawStaticFinal(canvas);
+  else if (state.image && !textOnly) renderSourcePreview();
+  else clearCanvas();
+
+  if (announce) {
+    setStatus(textOnly
+      ? "تم تفعيل «كتابة النص فقط». اكتبي النص، ولن تظهر الصورة أو مراحل الرسم والتلوين."
+      : "تمت العودة إلى الوضع الكامل للصورة والرسم والتلوين.", "success");
+  }
+}
+
+function prepareTextOnlyProject() {
+  if (!hasTextOnlyContent() || state.busy || state.isAnimating) {
+    setStatus("اكتبي النص أولًا، ثم جهّزي الكتابة.", "warning");
+    return false;
+  }
+  cancelAnimation();
+  updateTextOnlyProjectName();
+  controls.textSourceMode.value = "typed";
+  controls.textRender.value = "original";
+  controls.sequence.value = "text-draw-color";
+  controls.finish.value = "outline";
+  state.phaseSequence = ["text", "draw", "color"];
+  emptyState.classList.add("hidden");
+  pathStats.textContent = `${toArabicDigits(getTypedTextLines().length)} ${getTypedTextLines().length === 1 ? "سطر" : "أسطر"} • كتابة النص فقط`;
+  suggestPhaseDurations({ announce: false });
+  drawStaticFinal(canvas);
+  updateTextRegionStatus();
+  refreshButtons();
+  switchTab("video");
+  setStatus("أصبح مشروع النص جاهزًا. يمكنك إطالة وقت الكتابة حتى ٤٠٠٪ ثم تشغيل المعاينة أو حفظ الفيديو.", "success");
+  return true;
+}
+
 function configuredPhaseSeconds() {
-  const hasText = state.textPathIndices.length > 0 || getEffectiveTextRegions().length > 0 || !state.paths.length;
-  const hasColor = controls.finish.value !== "outline";
+  const textOnly = isTextOnlyProject();
+  const scale = clampNumber(controls.timingScale?.value || 100, 50, 400) / 100;
+  const hasText = textOnly || state.textPathIndices.length > 0 || getEffectiveTextRegions().length > 0 || !state.paths.length;
+  const hasColor = !textOnly && controls.finish.value !== "outline";
   return {
-    text: hasText ? clampNumber(controls.textDuration.value, 0, 120) : 0,
-    draw: clampNumber(controls.drawDuration.value, 1, 300),
-    color: hasColor ? clampNumber(controls.colorDuration.value, 0, 120) : 0
+    text: hasText ? clampNumber(controls.textDuration.value, 0, 300) * scale : 0,
+    draw: textOnly ? 0 : clampNumber(controls.drawDuration.value, 1, 600) * scale,
+    color: hasColor ? clampNumber(controls.colorDuration.value, 0, 240) * scale : 0
   };
 }
 
@@ -3561,17 +3764,29 @@ function updatePhaseTimeline() {
   const strokeHold = clampNumber(controls.finalStrokeHold.value, 0, 3);
   const total = phases.text + phases.draw + phases.color + strokeHold;
   const automaticSummary = $("#autoTimingSummary");
-  if (automaticSummary) automaticSummary.textContent = `المدة التلقائية نحو ${toArabicDigits(Math.round(total * 10) / 10)} ثانية`;
+  const scale = clampNumber(controls.timingScale?.value || 100, 50, 400);
+  if (automaticSummary) automaticSummary.textContent = `${isTextOnlyProject() ? "مدة الكتابة" : "المدة الحالية"} نحو ${toArabicDigits(roundTenth(total))} ثانية`;
+  const format = (value) => toArabicDigits(roundTenth(value));
   timeline.innerHTML = `
-    <span class="phase-text">النص ${toArabicDigits(phases.text)} ث</span>
-    <span class="phase-draw">الرسم ${toArabicDigits(phases.draw)} ث</span>
-    <span class="phase-color">التلوين ${toArabicDigits(phases.color)} ث</span>
-    <span class="phase-hold">ثبات اليد ${toArabicDigits(strokeHold)} ث</span>
-    <strong>الإجمالي ${toArabicDigits(Math.round(total * 10) / 10)} ث</strong>`;
+    <span class="phase-text">النص ${format(phases.text)} ث</span>
+    <span class="phase-draw">الرسم ${format(phases.draw)} ث</span>
+    <span class="phase-color">التلوين ${format(phases.color)} ث</span>
+    <span class="phase-hold">ثبات اليد ${format(strokeHold)} ث</span>
+    <strong>الإجمالي ${format(total)} ث</strong>`;
+  const timingScaleValue = $("#timingScaleValue");
+  if (timingScaleValue) timingScaleValue.textContent = scale === 100
+    ? "١٠٠٪ — التوقيت التلقائي"
+    : `${toArabicDigits(scale)}٪ — أبطأ ×${toArabicDigits(roundTenth(scale / 100))}`;
+  $$('[data-timing-scale]').forEach((button) => button.classList.toggle("active", Number(button.dataset.timingScale) === scale));
 }
 
 function suggestPhaseDurations({ announce = false } = {}) {
   const minD = Math.max(1, Math.min(canvas.width, canvas.height));
+  const textOnly = isTextOnlyProject();
+  const typedLines = getTypedTextLines();
+  const typedCharacters = typedLines.join("").length;
+  const typedWords = typedLines.join(" ").split(/\s+/).filter(Boolean).length;
+  const typedMode = textOnly || isTypedTextMode();
   const textLength = state.pathMeta.length
     ? state.pathMeta.filter((meta) => meta.isText).reduce((sum, meta) => sum + meta.length, 0)
     : minD * 2.5;
@@ -3581,24 +3796,31 @@ function suggestPhaseDurations({ announce = false } = {}) {
   const textCount = Math.max(1, state.textPathIndices.length || 4);
   const drawCount = Math.max(1, state.graphicPathIndices.length || state.paths.length || 12);
 
-  const textSeconds = state.textPathIndices.length
-    ? Math.round(clampNumber(8 + textLength / (minD * 0.55) + textCount * 0.04, 8, 75))
-    : 0;
-  const drawSeconds = Math.round(clampNumber(18 + drawLength / (minD * 0.42) + drawCount * 0.03, 20, 150));
-  const colorSeconds = controls.finish.value === "outline"
+  const textSeconds = typedMode
+    ? Math.round(clampNumber(6 + typedCharacters * 0.24 + typedWords * 0.16 + typedLines.length * 1.4, 8, 180))
+    : (state.textPathIndices.length
+      ? Math.round(clampNumber(8 + textLength / (minD * 0.55) + textCount * 0.04, 8, 90))
+      : 0);
+  const drawSeconds = textOnly
     ? 0
-    : Math.round(clampNumber(10 + Math.sqrt(Math.max(1, drawCount)) * 1.35, 10, 45));
+    : Math.round(clampNumber(24 + drawLength / (minD * 0.33) + drawCount * 0.045, 28, 240));
+  const colorSeconds = textOnly || controls.finish.value === "outline"
+    ? 0
+    : Math.round(clampNumber(12 + Math.sqrt(Math.max(1, drawCount)) * 1.55, 12, 60));
 
-  controls.textDuration.value = String(textSeconds || 5);
-  controls.drawDuration.value = String(drawSeconds);
-  controls.colorDuration.value = String(colorSeconds);
+  controls.textDuration.value = String(textSeconds || 8);
+  if (!textOnly) controls.drawDuration.value = String(drawSeconds);
+  if (!textOnly) controls.colorDuration.value = String(colorSeconds);
   controls.travelSpeed.value = "125";
   controls.fps.value = "30";
   updateLabels();
   saveSettings();
   if (announce) {
-    const total = textSeconds + drawSeconds + colorSeconds + Number(controls.finalStrokeHold.value);
-    setStatus(`تم حساب توقيت مناسب: ${toArabicDigits(textSeconds)} ث للنص، ${toArabicDigits(drawSeconds)} ث للرسم، ${toArabicDigits(colorSeconds)} ث للتلوين. الإجمالي نحو ${toArabicDigits(Math.round(total))} ثانية.`, "success");
+    const phases = configuredPhaseSeconds();
+    const total = phases.text + phases.draw + phases.color + Number(controls.finalStrokeHold.value);
+    setStatus(textOnly
+      ? `تم حساب وقت كتابة مناسب: نحو ${toArabicDigits(roundTenth(phases.text))} ثانية، ويمكن إطالته من الشريط حتى ٤٠٠٪.`
+      : `تم حساب توقيت مناسب: ${toArabicDigits(roundTenth(phases.text))} ث للنص، ${toArabicDigits(roundTenth(phases.draw))} ث للرسم، ${toArabicDigits(roundTenth(phases.color))} ث للتلوين. الإجمالي نحو ${toArabicDigits(Math.round(total))} ثانية.`, "success");
   }
   return { text: textSeconds, draw: drawSeconds, color: colorSeconds };
 }
@@ -3621,6 +3843,7 @@ function updateLabels() {
   $("#textDurationValue").textContent = `${toArabicDigits(controls.textDuration.value)} ث`;
   $("#drawDurationValue").textContent = `${toArabicDigits(controls.drawDuration.value)} ث`;
   $("#colorDurationValue").textContent = `${toArabicDigits(controls.colorDuration.value)} ث`;
+  if ($("#timingScaleValue")) $("#timingScaleValue").textContent = `${toArabicDigits(controls.timingScale?.value || 100)}٪`;
   $("#travelSpeedValue").textContent = `${toArabicDigits(controls.travelSpeed.value)}٪`;
   $("#finalStrokeHoldValue").textContent = `${toArabicDigits(controls.finalStrokeHold.value)} ث`;
   $("#holdValue").textContent = `${toArabicDigits(controls.hold.value)} ث`;
@@ -3846,7 +4069,8 @@ function applyCanvasRatio({ invalidate = true } = {}) {
   canvasSize.textContent = `${toArabicDigits(width)} × ${toArabicDigits(height)}`;
   if (invalidate) invalidateDrawing("تم تغيير المقاس. أنشئ الرسم من جديد.");
   else clearCanvas();
-  if (state.image) renderSourcePreview();
+  if (isTextOnlyProject() && hasTextOnlyContent()) drawStaticFinal(canvas);
+  else if (state.image) renderSourcePreview();
   renderTextRegionOverlay();
 }
 
@@ -3953,6 +4177,17 @@ function updateTextRegionStatus() {
   const manualCount = state.textRegions.length;
   const autoCount = state.autoTextRegions?.length || 0;
   const autoMode = controls.textDetection.value === "auto";
+  if (isTextOnlyProject()) {
+    const lines = getTypedTextLines();
+    textRegionStatus.textContent = lines.length
+      ? `وضع النص فقط نشط: ستكتب اليد ${toArabicDigits(lines.length)} ${lines.length === 1 ? "سطرًا" : "أسطر"} على خلفية نظيفة، من دون صورة أو رسم أو تلوين.`
+      : "وضع النص فقط نشط. اكتبي النص في الحقل المخصص، وسيظهر تلقائيًا أعلى اللوحة.";
+    textRegionStatus.classList.toggle("active", lines.length > 0);
+    if (buttons.markText) { buttons.markText.textContent = "النص فقط لا يحتاج تحديدًا"; buttons.markText.disabled = true; }
+    if (buttons.clearTextRegions) buttons.clearTextRegions.disabled = true;
+    return;
+  }
+  if (buttons.markText) buttons.markText.disabled = false;
   if (state.selectingText) {
     textRegionStatus.textContent = "اسحب بإصبعك مستطيلًا حول النص داخل المعاينة، ويمكن تحديد أكثر من منطقة.";
     textRegionStatus.classList.add("active");
@@ -4020,6 +4255,10 @@ function normalizedRegionFromPoints(start, end) {
 }
 
 function toggleTextSelection() {
+  if (isTextOnlyProject()) {
+    setStatus("وضع النص فقط لا يحتاج إلى تحديد منطقة داخل صورة.", "warning");
+    return;
+  }
   if (!state.image || state.busy || state.isAnimating) {
     setStatus("حمّل صورة أولًا، ثم حدد مكان النص داخل المعاينة.", "warning");
     return;
@@ -4105,6 +4344,11 @@ function buildSourceCanvas() {
 }
 
 function renderSourcePreview() {
+  if (isTextOnlyProject()) {
+    if (hasTextOnlyContent()) drawTextOnlyFinal(canvas);
+    else clearCanvas();
+    return;
+  }
   if (!state.image) return;
   drawImageLayer(ctx, canvas.width, canvas.height, { fillBackground: true, background: controls.background.value });
   drawTitleOverlay(ctx, canvas.width, canvas.height);
@@ -4714,6 +4958,7 @@ function samplePathColors(paths, imageData) {
 }
 
 async function createDrawing() {
+  if (isTextOnlyProject()) return prepareTextOnlyProject();
   if (!state.image || state.busy || state.isAnimating) return;
   cancelAnimation();
   const enhanced = true;
@@ -6104,7 +6349,7 @@ function makeColorEvent(width, height, hideText) {
 
 
 function makeColorEvents(width, height, hideText) {
-  if (controls.finish.value === "outline") return [];
+  if (isTextOnlyProject() || controls.finish.value === "outline") return [];
   if (controls.finish.value === "side") {
     const single = makeColorEvent(width, height, hideText);
     return single ? [single] : [];
@@ -6147,19 +6392,21 @@ function makeColorEvents(width, height, hideText) {
 }
 
 function buildAnimationPlan(width, height) {
-  if (!state.pathMeta.length) classifyTextPaths();
-  const sequence = controls.sequence.value;
-  const text = state.textPathIndices.length ? state.textPathIndices : [];
+  if (!state.pathMeta.length && state.paths.length) classifyTextPaths();
+  const textOnly = isTextOnlyProject();
+  const sequence = textOnly ? "text-draw-color" : controls.sequence.value;
+  const text = textOnly ? [] : (state.textPathIndices.length ? state.textPathIndices : []);
   const effectiveRegions = getEffectiveTextRegions();
-  const hasTextPhase = isTypedTextMode() || text.length > 0 || (controls.textRender.value === "original" && effectiveRegions.length > 0);
-  const graphics = state.graphicPathIndices.length ? state.graphicPathIndices : state.paths.map((_, index) => index);
-  const all = state.paths.map((_, index) => index);
+  const hasTextPhase = textOnly || isTypedTextMode() || text.length > 0 || (controls.textRender.value === "original" && effectiveRegions.length > 0);
+  const graphics = textOnly ? [] : (state.graphicPathIndices.length ? state.graphicPathIndices : state.paths.map((_, index) => index));
+  const all = textOnly ? [] : state.paths.map((_, index) => index);
   const events = [];
   let previousEnd = null;
-  const order = sequence === "natural" ? ["draw", "color"] : getPhaseOrder();
-  const hideTextDuringColor = hasTextPhase && order.indexOf("color") >= 0 && order.indexOf("text") > order.indexOf("color");
+  const order = textOnly ? ["text"] : (sequence === "natural" ? ["draw", "color"] : getPhaseOrder());
+  const hideTextDuringColor = !textOnly && hasTextPhase && order.indexOf("color") >= 0 && order.indexOf("text") > order.indexOf("color");
 
   const appendColor = () => {
+    if (textOnly) return;
     const colorEvents = makeColorEvents(width, height, hideTextDuringColor);
     if (!colorEvents.length) return;
     const travelSpeed = Math.max(0.4, Number(controls.travelSpeed.value) / 100);
@@ -6174,7 +6421,9 @@ function buildAnimationPlan(width, height) {
     }
   };
 
-  if (sequence === "natural") {
+  if (textOnly) {
+    previousEnd = appendTextGroup(events, [], width, height, previousEnd);
+  } else if (sequence === "natural") {
     previousEnd = appendPathGroup(events, all, width, height, previousEnd, "draw");
     appendColor();
   } else {
@@ -6203,7 +6452,7 @@ function buildAnimationPlan(width, height) {
     event.endUnit = totalUnits;
   }
   const phases = [...new Set(events.map((event) => event.phase))];
-  return { events, totalUnits: Math.max(1, totalUnits), totalDurationMs: Math.max(1, totalUnits), width, height, phases, phaseSeconds, hasTextPhase, hideTextDuringColor, phaseOrder: order };
+  return { events, totalUnits: Math.max(1, totalUnits), totalDurationMs: Math.max(1, totalUnits), width, height, phases, phaseSeconds, hasTextPhase, hideTextDuringColor, phaseOrder: order, textOnly };
 }
 
 function pointAtPathDistance(event, distance) {
@@ -6398,7 +6647,29 @@ function shouldShowTitleForPhase(phase, completed = false) {
   return phaseIndex >= textIndex;
 }
 
+function drawTextOnlyFinal(targetCanvas = canvas) {
+  if (!hasTextOnlyContent()) {
+    clearCanvas(targetCanvas);
+    if (targetCanvas === canvas) emptyState.classList.remove("hidden");
+    return;
+  }
+  const inkCanvas = createInkCanvas(targetCanvas.width, targetCanvas.height);
+  const textCanvas = createInkCanvas(targetCanvas.width, targetCanvas.height);
+  drawFullOriginalTextRegions(textCanvas.getContext("2d"), targetCanvas.width, targetCanvas.height);
+  renderComposite(targetCanvas, inkCanvas, {
+    textCanvas,
+    finalPhase: false,
+    showTitle: true,
+    exactFinalAlpha: 0
+  });
+  if (targetCanvas === canvas) emptyState.classList.add("hidden");
+}
+
 function drawStaticFinal(targetCanvas = canvas) {
+  if (isTextOnlyProject()) {
+    drawTextOnlyFinal(targetCanvas);
+    return;
+  }
   if (!state.paths.length) {
     renderSourcePreview();
     return;
@@ -6433,7 +6704,7 @@ function cancelAnimation() {
 }
 
 async function startAnimation(targetCanvas = canvas, { recording = false } = {}) {
-  if (!state.paths.length) return false;
+  if (!hasPlayableContent()) return false;
   cancelAnimation();
 
   if (controls.hand.value === "hand") {
@@ -6467,7 +6738,9 @@ async function startAnimation(targetCanvas = canvas, { recording = false } = {})
   state.recording = recording;
   refreshButtons();
   if (targetCanvas === canvas) {
-    setStatus(recording ? "جاري تسجيل النص والرسم والتلوين…" : "رأس القلم متزامن الآن مع الخط، وتبقى اليد ظاهرة مع رفع القلم أثناء الانتقال، والدوران هادئ عند الزوايا.");
+    setStatus(isTextOnlyProject()
+      ? (recording ? "جاري تسجيل كتابة النص فقط…" : "تكتب اليد النص الآن على خلفية نظيفة، من دون صورة أو رسم أو تلوين.")
+      : (recording ? "جاري تسجيل النص والرسم والتلوين…" : "رأس القلم متزامن الآن مع الخط، وتبقى اليد ظاهرة مع رفع القلم أثناء الانتقال، والدوران هادئ عند الزوايا."));
     progressBar.style.width = "0%";
   }
   let startedAt = null;
@@ -6549,7 +6822,9 @@ async function startAnimation(targetCanvas = canvas, { recording = false } = {})
           finalCtx.fillStyle = controls.background.value;
           finalCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
         }
-        if (targetCanvas === canvas) setStatus("اكتملت جميع المسارات بنسبة ١٠٠٪، وبقي رأس القلم ملاصقًا لمسار الرسم والتلوين.", "success");
+        if (targetCanvas === canvas) setStatus(isTextOnlyProject()
+          ? "اكتملت كتابة النص بنسبة ١٠٠٪."
+          : "اكتملت جميع المسارات بنسبة ١٠٠٪، وبقي رأس القلم ملاصقًا لمسار الرسم والتلوين.", "success");
         finish(true);
       }
     };
@@ -6617,6 +6892,7 @@ function openExportResult(blob, filename, kind) {
   saveExportHistory(blob, filename, kind).catch((error) => console.warn("تعذر حفظ الملف في المحفوظات", error));
   downloadLink.href = url;
   downloadLink.download = filename;
+  downloadLink.textContent = kind === "project" ? "تنزيل المشروع" : "تنزيل الملف";
   exportVideoPreview.hidden = true;
   exportImagePreview.hidden = true;
   exportVideoPreview.removeAttribute("src");
@@ -6629,6 +6905,8 @@ function openExportResult(blob, filename, kind) {
     exportImagePreview.src = url;
     exportImagePreview.hidden = false;
     exportDialogText.textContent = "تم تجهيز الصورة بالحجم والجودة المختارين.";
+  } else if (kind === "project") {
+    exportDialogText.textContent = "تم تجهيز ملف المشروع. لاستعادة العمل، افتح «أثر القلم» ثم اختر الملف من «اختر صورة». لا تفتح الملف مباشرة خارج التطبيق؛ فقد تظهر بيانات تقنية غير مخصصة للقراءة.";
   } else {
     exportDialogText.textContent = "تم تجهيز الملف ويمكن تنزيله الآن.";
   }
@@ -6708,7 +6986,7 @@ function videoErrorMessage(error) {
 }
 
 async function exportVideo() {
-  if (!state.paths.length || state.busy || state.isAnimating || state.batchExporting) return;
+  if (!hasPlayableContent() || state.busy || state.isAnimating || state.batchExporting) return;
   let mimeType;
   try {
     mimeType = ensureVideoSupport();
@@ -6903,12 +7181,12 @@ async function exportBatchVideos() {
     await releaseWakeLock();
     hideBusy();
     refreshButtons();
-    if (state.paths.length) drawStaticFinal(canvas);
+    if (hasPlayableContent()) drawStaticFinal(canvas);
   }
 }
 
 async function exportPng() {
-  if (!state.paths.length || state.busy || state.isAnimating) return;
+  if (!hasPlayableContent() || state.busy || state.isAnimating) return;
   const [width, height] = getExportDimensions();
   exportCanvas.width = width;
   exportCanvas.height = height;
@@ -6943,16 +7221,17 @@ function getBrandDataUrl() {
 }
 
 async function exportSvg() {
-  if (!state.paths.length || state.busy || state.isAnimating) return;
+  if (!hasPlayableContent() || state.busy || state.isAnimating) return;
   const [width, height] = getExportDimensions();
   const scaleX = width / canvas.width, scaleY = height / canvas.height;
   const lineScale = Math.min(scaleX, scaleY);
   setBusy(true, "جاري تجهيز ملف SVG…");
   try {
-    const pathMarkup = state.paths.map((path, index) => {
+    const pathMarkup = isTextOnlyProject() ? "" : state.paths.map((path, index) => {
       const d = path.map(([x, y], pointIndex) => `${pointIndex ? "L" : "M"}${(x * scaleX).toFixed(1)} ${(y * scaleY).toFixed(1)}`).join(" ");
       return `<path d="${d}" fill="none" stroke="${escapeXml(getPathColor(index))}" stroke-width="${(Number(controls.line.value) * lineScale).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round"/>`;
     }).join("\n");
+    const typedTextMarkup = isTextOnlyProject() ? getTypedTextLayout(width, height).map((line) => `<text x="${line.right.toFixed(1)}" y="${line.baseline.toFixed(1)}" text-anchor="end" direction="rtl" font-family="Tahoma, Arial, sans-serif" font-size="${line.size}" font-weight="700" fill="${escapeXml(controls.textInk?.value === "pen" ? (styleColors[controls.style.value] || controls.customColor.value || "#17222c") : "#15395f")}">${escapeXml(line.text)}</text>`).join("\n") : "";
     const minD = Math.min(width, height);
     const title = controls.title.value.trim();
     const subtitle = controls.subtitle.value.trim();
@@ -6968,7 +7247,7 @@ async function exportSvg() {
       const y = height - minD * 0.025 - cardHeight;
       overlays += `<g font-family="Arial, Tahoma, sans-serif" direction="rtl"><rect x="${x}" y="${y}" width="${cardWidth}" height="${cardHeight}" rx="${cardHeight * 0.22}" fill="white" fill-opacity="0.92"/>${brandUrl ? `<image href="${brandUrl}" x="${x + cardWidth - cardHeight * 0.9}" y="${y + cardHeight * 0.1}" width="${cardHeight * 0.8}" height="${cardHeight * 0.8}"/>` : ""}<text x="${x + cardWidth - cardHeight}" y="${y + cardHeight * 0.42}" text-anchor="end" font-size="${minD * 0.026}" font-weight="700" fill="#0a3760">${escapeXml(controls.owner.value)}</text><text x="${x + cardWidth - cardHeight}" y="${y + cardHeight * 0.73}" text-anchor="end" font-size="${minD * 0.019}" fill="#48687e">${escapeXml(controls.forum.value)}</text></g>`;
     }
-    const svg = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="100%" height="100%" fill="${escapeXml(controls.background.value)}"/>${pathMarkup}${overlays}</svg>`;
+    const svg = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="100%" height="100%" fill="${escapeXml(controls.background.value)}"/>${pathMarkup}${typedTextMarkup}${overlays}</svg>`;
     const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
     openExportResult(blob, `${sanitizeFilename(state.imageName)}-أثر-القلم.svg`, "file");
     setStatus("تم تجهيز ملف SVG قابل للتكبير والطباعة.", "success");
@@ -6999,36 +7278,37 @@ function base64ToUint8(value) {
 }
 
 async function exportProject() {
-  if (!state.image || state.busy || state.isAnimating) return;
+  if ((!state.image && !hasTextOnlyContent()) || state.busy || state.isAnimating) return;
   setBusy(true, "جاري حفظ المشروع…");
   try {
     const project = {
       app: "أثر القلم",
-      version: 4,
+      version: 5,
       createdAt: new Date().toISOString(),
+      projectKind: isTextOnlyProject() ? "text-only" : "image",
       imageName: state.imageName,
-      imageDataUrl: state.imageDataUrl,
+      imageDataUrl: isTextOnlyProject() ? "" : (state.imageDataUrl || ""),
       settings: getSettings(),
       canvas: { width: canvas.width, height: canvas.height },
-      textRegions: state.textRegions,
-      paths: state.paths,
-      pathColors: state.pathColors,
-      pathModes: state.pathModes,
-      pathComponentIds: state.pathComponentIds,
-      engineStats: state.engineStats,
-      engineSvg: state.engineSvg,
-      outlineMaskBase64: uint8ToBase64(state.outlineMask),
+      textRegions: isTextOnlyProject() ? [] : state.textRegions,
+      paths: isTextOnlyProject() ? [] : state.paths,
+      pathColors: isTextOnlyProject() ? [] : state.pathColors,
+      pathModes: isTextOnlyProject() ? [] : state.pathModes,
+      pathComponentIds: isTextOnlyProject() ? [] : state.pathComponentIds,
+      engineStats: isTextOnlyProject() ? null : state.engineStats,
+      engineSvg: isTextOnlyProject() ? "" : state.engineSvg,
+      outlineMaskBase64: isTextOnlyProject() ? "" : uint8ToBase64(state.outlineMask),
       outlineWidth: state.outlineWidth,
       outlineHeight: state.outlineHeight,
-      colorMaskBase64: uint8ToBase64(state.colorMask),
+      colorMaskBase64: isTextOnlyProject() ? "" : uint8ToBase64(state.colorMask),
       colorMaskWidth: state.colorMaskWidth,
       colorMaskHeight: state.colorMaskHeight,
-      engineTextRegions: state.engineTextRegions,
-      engineColorRegions: state.engineColorRegions
+      engineTextRegions: isTextOnlyProject() ? [] : state.engineTextRegions,
+      engineColorRegions: isTextOnlyProject() ? [] : state.engineColorRegions
     };
     const blob = new Blob([JSON.stringify(project)], { type: "application/json;charset=utf-8" });
-    openExportResult(blob, `${sanitizeFilename(state.imageName)}.athar.json`, "file");
-    setStatus("تم تجهيز ملف المشروع. يمكنك فتحه لاحقًا من زر اختيار صورة.", "success");
+    openExportResult(blob, `${sanitizeFilename(state.imageName)}.athar.json`, "project");
+    setStatus("تم حفظ ملف المشروع. لاستعادته، اختره من «اختر صورة» داخل أثر القلم.", "success");
   } catch (error) {
     console.error(error);
     setStatus("تعذر حفظ المشروع.", "error");
@@ -7041,36 +7321,53 @@ async function importProject(file) {
   setBusy(true, "جاري فتح مشروع أثر القلم…");
   try {
     const project = JSON.parse(await file.text());
-    if (project.app !== "أثر القلم" || !project.imageDataUrl) throw new Error("ملف المشروع غير صالح");
+    const textOnlyProject = project?.projectKind === "text-only" || project?.settings?.projectMode === "text-only";
+    const typedText = String(project?.settings?.typedText || "").trim();
+    if (project.app !== "أثر القلم" || (!project.imageDataUrl && !(textOnlyProject && typedText))) throw new Error("ملف المشروع غير صالح");
     applySettings(project.settings || {});
+    if (textOnlyProject) controls.projectMode.value = "text-only";
     applyCanvasRatio({ invalidate: false });
-    const image = await loadImageFromUrl(project.imageDataUrl);
-    state.image = image;
-    state.imageDataUrl = project.imageDataUrl;
-    state.imageName = project.imageName || "مشروع محفوظ";
+
+    if (project.imageDataUrl) {
+      const image = await loadImageFromUrl(project.imageDataUrl);
+      state.image = image;
+      state.imageDataUrl = project.imageDataUrl;
+    } else {
+      state.image = null;
+      state.imageDataUrl = "";
+    }
+    state.imageName = project.imageName || (textOnlyProject ? "مشروع نصي محفوظ" : "مشروع محفوظ");
     projectName.textContent = state.imageName;
-    if (project.canvas?.width === canvas.width && project.canvas?.height === canvas.height && Array.isArray(project.paths)) {
-      state.paths = project.paths;
-      state.pathColors = project.pathColors || [];
-      state.pathModes = Array.isArray(project.pathModes) && project.pathModes.length === state.paths.length ? project.pathModes : state.paths.map(() => "centerline");
-      state.pathComponentIds = Array.isArray(project.pathComponentIds) && project.pathComponentIds.length === state.paths.length ? project.pathComponentIds : state.paths.map((_, index) => index);
-      state.textRegions = Array.isArray(project.textRegions) ? project.textRegions : [];
-      state.engineStats = project.engineStats || null;
-      state.engineSvg = project.engineSvg || "";
-      state.outlineMask = base64ToUint8(project.outlineMaskBase64);
-      state.outlineWidth = Number(project.outlineWidth || canvas.width);
-      state.outlineHeight = Number(project.outlineHeight || canvas.height);
-      state.colorMask = base64ToUint8(project.colorMaskBase64);
-      state.colorMaskWidth = Number(project.colorMaskWidth || canvas.width);
-      state.colorMaskHeight = Number(project.colorMaskHeight || canvas.height);
-      state.engineTextRegions = Array.isArray(project.engineTextRegions) ? project.engineTextRegions : [];
-      state.engineColorRegions = Array.isArray(project.engineColorRegions) ? project.engineColorRegions : [];
-      state.autoTextRegions = [];
-      state.totalSegments = state.paths.reduce((sum, path) => sum + Math.max(0, path.length - 1), 0);
-      buildSourceCanvas();
-      classifyTextPaths();
-      updateTextRegionStatus();
-      renderTextRegionOverlay();
+    state.paths = Array.isArray(project.paths) ? project.paths : [];
+    state.pathColors = project.pathColors || [];
+    state.pathModes = Array.isArray(project.pathModes) && project.pathModes.length === state.paths.length ? project.pathModes : state.paths.map(() => "centerline");
+    state.pathComponentIds = Array.isArray(project.pathComponentIds) && project.pathComponentIds.length === state.paths.length ? project.pathComponentIds : state.paths.map((_, index) => index);
+    state.textRegions = Array.isArray(project.textRegions) ? project.textRegions : [];
+    state.engineStats = project.engineStats || null;
+    state.engineSvg = project.engineSvg || "";
+    state.outlineMask = base64ToUint8(project.outlineMaskBase64);
+    state.outlineWidth = Number(project.outlineWidth || canvas.width);
+    state.outlineHeight = Number(project.outlineHeight || canvas.height);
+    state.colorMask = base64ToUint8(project.colorMaskBase64);
+    state.colorMaskWidth = Number(project.colorMaskWidth || canvas.width);
+    state.colorMaskHeight = Number(project.colorMaskHeight || canvas.height);
+    state.engineTextRegions = Array.isArray(project.engineTextRegions) ? project.engineTextRegions : [];
+    state.engineColorRegions = Array.isArray(project.engineColorRegions) ? project.engineColorRegions : [];
+    state.autoTextRegions = [];
+    state.totalSegments = state.paths.reduce((sum, path) => sum + Math.max(0, path.length - 1), 0);
+
+    if (state.image) buildSourceCanvas();
+    if (state.paths.length) classifyTextPaths();
+    syncProjectModeUI({ announce: false });
+    updateTextRegionStatus();
+    renderTextRegionOverlay();
+    emptyState.classList.add("hidden");
+
+    if (textOnlyProject) {
+      drawStaticFinal(canvas);
+      pathStats.textContent = `${toArabicDigits(getTypedTextLines().length)} ${getTypedTextLines().length === 1 ? "سطر" : "أسطر"} • مشروع نصي محفوظ`;
+      switchTab("video");
+    } else if (project.canvas?.width === canvas.width && project.canvas?.height === canvas.height && state.paths.length) {
       drawStaticFinal(canvas);
       pathStats.textContent = `${toArabicDigits(state.paths.length)} ضربة • مشروع محفوظ`;
       switchTab("video");
@@ -7081,7 +7378,6 @@ async function importProject(file) {
       renderSourcePreview();
       switchTab("drawing");
     }
-    emptyState.classList.add("hidden");
     setStatus("تم فتح المشروع بنجاح.", "success");
     saveSettings();
   } catch (error) {
@@ -7148,6 +7444,8 @@ function resetApp() {
   state.image = null;
   state.imageDataUrl = "";
   state.imageName = "مشروع جديد";
+  controls.projectMode.value = "full";
+  controls.timingScale.value = "100";
   state.paths = [];
   state.pathColors = [];
   state.totalSegments = 0;
@@ -7169,13 +7467,14 @@ function resetApp() {
   emptyState.classList.remove("hidden");
   pathStats.textContent = "لا توجد مسارات بعد";
   clearCanvas();
+  syncProjectModeUI({ announce: false });
   setStatus("اختر صورة للبدء.");
   switchTab("image");
   refreshButtons();
 }
 
 function showOriginal(active) {
-  if (!state.image || state.busy || state.isAnimating) return;
+  if (isTextOnlyProject() || !state.image || state.busy || state.isAnimating) return;
   state.previewOriginal = active;
   if (active) renderSourcePreview();
   else if (state.paths.length) drawStaticFinal(canvas);
@@ -7342,12 +7641,20 @@ function registerEvents() {
   buttons.prepare.addEventListener("click", createDrawing);
   if (buttons.quickAnalyze) buttons.quickAnalyze.addEventListener("click", createDrawing);
   if (buttons.resetSequence) buttons.resetSequence.addEventListener("click", resetPhaseSequence);
+  controls.projectMode.addEventListener("change", () => { syncProjectModeUI({ announce: true, openTextSettings: isTextOnlyProject() }); saveSettings(); });
+  $$(`[data-timing-scale]`).forEach((button) => button.addEventListener("click", () => {
+    controls.timingScale.value = button.dataset.timingScale;
+    updateLabels();
+    saveSettings();
+    setStatus(`تم ضبط إطالة المدة على ${toArabicDigits(controls.timingScale.value)}٪.`, "success");
+  }));
   if (buttons.testNaturalText) buttons.testNaturalText.addEventListener("click", () => {
     controls.textSourceMode.value = "typed";
     if (!controls.typedText.value.trim()) controls.typedText.value = "قيمة الصدق\nالصدق خُلُق عظيم";
     controls.textRender.value = "original"; controls.textMotion.value = "natural"; controls.sequence.value = "text-draw-color";
     syncPhaseSequenceFromSelect(); updateLabels(); saveSettings();
     if (state.paths.length) { drawStaticFinal(canvas); setStatus("محرك الحركة الطبيعية ٢ نشط. شغّل المعاينة لرؤية الكتابة الحقيقية.", "success"); }
+    else if (isTextOnlyProject()) { drawStaticFinal(canvas); setStatus("محرك الكتابة جاهز في وضع النص فقط. شغّلي المعاينة لرؤية الكتابة.", "success"); }
     else setStatus("تم تفعيل محرك الكتابة. ارفع صورة ثم أنشئ الرسم المتحرك.", "success");
   });
   $$('[data-smart-preset]').forEach((button) => button.addEventListener("click", () => applySmartPreset(button.dataset.smartPreset)));
@@ -7379,12 +7686,15 @@ function registerEvents() {
     controls.title, controls.subtitle, controls.brand, controls.owner, controls.forum, controls.community, controls.brandSize].forEach((control) => {
     const eventName = control.type === "text" ? "input" : "input";
     control.addEventListener(eventName, () => {
-      updateLabels(); saveSettings();
-      if (state.paths.length && !state.isAnimating && !state.busy) drawStaticFinal(canvas);
-      else if (state.image && !state.paths.length) renderSourcePreview();
+      if (control === controls.typedText && isTextOnlyProject()) updateTextOnlyProjectName();
+      updateLabels(); updateTextRegionStatus(); saveSettings();
+      if (hasPlayableContent() && !state.isAnimating && !state.busy) drawStaticFinal(canvas);
+      else if (state.image && !state.paths.length && !isTextOnlyProject()) renderSourcePreview();
+      else if (isTextOnlyProject()) clearCanvas();
+      refreshButtons();
     });
   });
-  [controls.textDuration, controls.drawDuration, controls.colorDuration, controls.travelSpeed, controls.finalStrokeHold, controls.hold,
+  [controls.textDuration, controls.drawDuration, controls.colorDuration, controls.timingScale, controls.travelSpeed, controls.finalStrokeHold, controls.hold,
     controls.hand, controls.shadow, controls.handSize, controls.handOpacity, controls.handAngle, controls.handSmooth, controls.handLife, controls.wordPause, controls.penLift,
     controls.quality, controls.fps, controls.max1080, controls.endBlur, controls.endCard, controls.fadeOut, controls.fadeOutDuration].forEach((control) => {
     control.addEventListener("input", () => { updateLabels(); saveSettings(); });
@@ -7441,7 +7751,7 @@ function registerEvents() {
     exportVideoPreview.pause();
   });
 
-  handImage.addEventListener("load", () => { state.handReady = true; if (state.paths.length && !state.isAnimating) drawStaticFinal(canvas); });
+  handImage.addEventListener("load", () => { state.handReady = true; if (hasPlayableContent() && !state.isAnimating) drawStaticFinal(canvas); });
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     state.installPrompt = event;
@@ -7497,7 +7807,7 @@ function setupCompactSettings() {
     videoPanel.dataset.compactReady = "true";
     const nodes = [...videoPanel.children];
     createSettingsAccordion(videoPanel, "جودة الفيديو ونهايته", nodes.slice(0, 2), true);
-    createSettingsAccordion(videoPanel, "السرعة التلقائية", [nodes[2]]);
+    createSettingsAccordion(videoPanel, "المدة والتحكم بالسرعة", [nodes[2]], true);
     createSettingsAccordion(videoPanel, "النهاية والعناوين", nodes.slice(3, 8));
     createSettingsAccordion(videoPanel, "المعاينة والحفظ", nodes.slice(8, 11));
   }
@@ -7525,10 +7835,11 @@ function init() {
   renderPhaseSequenceEditor();
   setupCompactSettings();
   registerEvents();
+  syncProjectModeUI({ announce: false });
   refreshButtons();
   buttons.install.hidden = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   if (brandImage.complete) drawStaticFinal(canvas);
-  else brandImage.addEventListener("load", () => { if (state.image) state.paths.length ? drawStaticFinal(canvas) : renderSourcePreview(); });
+  else brandImage.addEventListener("load", () => { if (hasPlayableContent()) drawStaticFinal(canvas); else if (state.image) renderSourcePreview(); });
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
