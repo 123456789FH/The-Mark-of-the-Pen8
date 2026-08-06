@@ -858,7 +858,7 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
 /* دمج محرك الحركة الطبيعية ٢ */
 .typed-text-engine-card{border:1px solid #b9dce8;background:linear-gradient(180deg,#f7fcff,#eef8fb);border-radius:18px;padding:14px;margin:12px 0;display:grid;gap:12px}.engine-active-badge{display:inline-flex;width:max-content;max-width:100%;align-items:center;gap:7px;background:#e5f7ed;color:#17643b;border:1px solid #a8dfbd;border-radius:999px;padding:7px 12px;font-weight:800}.engine-active-badge::before{content:"✓";display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#27a765;color:white}.typed-text-engine-card textarea{width:100%;min-height:82px;resize:vertical;border:1px solid #c9dbe4;border-radius:13px;padding:11px 12px;font:inherit;line-height:1.7;direction:rtl;background:white;color:#173a5a}.typed-text-engine-card textarea:focus{outline:3px solid rgba(30,151,201,.15);border-color:#329bc4}@media(max-width:760px){.typed-text-engine-card .two-columns{grid-template-columns:1fr}.engine-active-badge{width:100%;justify-content:center}}
 
-/* ===== أثر القلم ٧: السبورة الحرة ===== */
+/* ===== أثر القلم ٨٫٠٫٣: إصلاح اللمس وأدوات السبورة الحرة على الآيباد ===== */
 .workspace-mode-switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1233,7 +1233,7 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
             </div>
             <label class="switch-row board-switch-row">
               <input id="boardPalmToggle" type="checkbox" checked />
-              <span>منع لمس راحة اليد أثناء استخدام القلم</span>
+              <span>منع راحة اليد أثناء ملامسة Apple Pencil — ويظل الرسم بالإصبع متاحًا</span>
             </label>
             <label class="switch-row board-switch-row">
               <input id="boardIdentityToggle" type="checkbox" checked />
@@ -1982,7 +1982,7 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
   <script>"use strict";
 
 (() => {
-  const BOARD_VERSION = "8.0.0";
+  const BOARD_VERSION = "8.0.3";
   const AUTOSAVE_KEY = "athar-alqalam-board-v7-autosave";
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -2517,18 +2517,23 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
   }
 
   function shouldIgnorePointer(event) {
-    if (event.pointerType === "pen") {
+    const pointerType = event.pointerType || "mouse";
+    if (pointerType === "pen") {
       state.penActive = true;
       state.lastPenAt = Date.now();
       return false;
     }
-    if (event.pointerType === "touch" && state.palmRejection) {
-      if (state.tool === "select" || state.tool === "hand") return false;
-      const recentlyUsedPen = Date.now() - state.lastPenAt < 900;
-      const broadContact = Number(event.width || 0) > 28 || Number(event.height || 0) > 28;
-      if (state.penActive || recentlyUsedPen || broadContact) return true;
-    }
-    return false;
+    if (pointerType !== "touch" || !state.palmRejection) return false;
+    if (state.tool === "select" || state.tool === "hand") return false;
+
+    // كان الإصدار السابق يعتبر مساحة لمس الإصبع العادية «راحة يد»،
+    // ولذلك تجاهل كل محاولات الرسم باللمس على Safari في الآيباد.
+    // الآن لا يُمنع اللمس إلا عند وجود Apple Pencil فعليًا على السبورة
+    // أو للحظات قصيرة جدًا بعد رفعه مع تماس عريض يشبه راحة اليد.
+    const recentlyUsedPen = Date.now() - state.lastPenAt < 320;
+    const contactSize = Math.max(Number(event.width || 0), Number(event.height || 0));
+    const palmLikeContact = contactSize >= 46;
+    return state.penActive || (recentlyUsedPen && palmLikeContact);
   }
 
   function findElementAt(point) {
@@ -2641,10 +2646,14 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
     if (state.mode !== "board") return;
     if (shouldIgnorePointer(event)) return;
     if (event.button !== undefined && event.button !== 0) return;
+    if (event.pointerType === "touch" && event.isPrimary === false && state.tool !== "select") {
+      event.preventDefault();
+      return;
+    }
     const point = getPoint(event);
 
     if (state.tool === "hand") {
-      state.interaction = { type: "pan", startX: event.clientX, startY: event.clientY, scrollLeft: boardViewport.scrollLeft, scrollTop: boardViewport.scrollTop };
+      state.interaction = { type: "pan", pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, scrollLeft: boardViewport.scrollLeft, scrollTop: boardViewport.scrollTop };
       try { boardCanvas.setPointerCapture?.(event.pointerId); } catch (_) {}
       event.preventDefault();
       return;
@@ -2691,10 +2700,10 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
     if (["pen", "highlighter", "eraser"].includes(state.tool)) {
       const width = state.tool === "eraser" ? Math.max(16, state.width * 3.2) : state.tool === "highlighter" ? Math.max(12, state.width * 2.3) : state.width;
       state.draft = { id: makeId(), tool: state.tool, color: state.color, width, points: [point] };
-      state.interaction = { type: "draw" };
+      state.interaction = { type: "draw", pointerId: event.pointerId };
     } else {
       state.draft = { id: makeId(), tool: state.tool, color: state.color, width: state.width, x1: point.x, y1: point.y, x2: point.x, y2: point.y };
-      state.interaction = { type: "shape" };
+      state.interaction = { type: "shape", pointerId: event.pointerId };
     }
     try { boardCanvas.setPointerCapture?.(event.pointerId); } catch (_) {}
     event.preventDefault();
@@ -2706,6 +2715,10 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
     }
     let interaction = state.interaction;
     if (!interaction) return;
+    if (interaction.type !== "resize-image" && interaction.pointerId !== undefined && interaction.pointerId !== event.pointerId) {
+      // تجاهل حركة إصبع أو راحة يد أخرى كي لا تقطع ضربة القلم الأساسية.
+      return;
+    }
     if (interaction.type === "resize-image") {
       const element = currentPage().elements.find((item) => item.id === interaction.elementId);
       const pair = activeTouchPair();
@@ -2772,6 +2785,11 @@ dialog::backdrop { background: rgba(5, 28, 47, 0.63); backdrop-filter: blur(4px)
     }
     const interaction = state.interaction;
     if (!interaction) return;
+    if (interaction.type !== "resize-image" && interaction.pointerId !== undefined && interaction.pointerId !== event.pointerId) {
+      // رفع إصبع ثانٍ لا يجب أن ينهي ضربة Apple Pencil أو الإصبع الأساسية.
+      event.preventDefault();
+      return;
+    }
     if (interaction.type === "draw" || interaction.type === "shape") {
       if (state.draft) {
         const valid = interaction.type === "draw" ? state.draft.points.length > 1 : Math.hypot(state.draft.x2 - state.draft.x1, state.draft.y2 - state.draft.y1) > 3;
